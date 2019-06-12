@@ -121,12 +121,12 @@ ECHO_MSG?=		${ECHO_CMD}
 .elif !defined(_PKGTOOLSDEFINED)
 _PKGTOOLSDEFINED=	yes
 PKG_BIN?=		${LOCALBASE}/sbin/pkg-static
-PKG_REGISTER?=		${PKG_BIN} register
-PKG_DELETE?=		${PKG_BIN} delete -y
-PKG_INFO?=		${PKG_BIN} info -g
-PKG_VERSION?=		${PKG_BIN} version
-PKG_CREATE?=		${PKG_BIN} create
-PKG_ADD?=		${PKG_BIN} add
-PKG_QUERY?=		${PKG_BIN} query
+PKG_REGISTER?=		${PKG_BIN} ${PKG_ARGS_ROOT} register
+PKG_DELETE?=		${PKG_BIN} ${PKG_ARGS_ROOT} delete -y
+PKG_INFO?=		${PKG_BIN} ${PKG_ARGS_ROOT} info -g
+PKG_VERSION?=		${PKG_BIN} ${PKG_ARGS_ROOT} version
+PKG_CREATE?=		${PKG_BIN} ${PKG_ARGS_ROOT} create
+PKG_ADD?=		${PKG_BIN} ${PKG_ARGS_ROOT} add
+PKG_QUERY?=		${PKG_BIN} ${PKG_ARGS_ROOT} query
 
 .endif

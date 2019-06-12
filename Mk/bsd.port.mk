@@ -1022,6 +1022,21 @@ FreeBSD_MAINTAINER=	portmgr@FreeBSD.org
 # Most port authors should not need to understand anything after this point.
 #
 
+.ifdef PORTS_SEPARATED_BUILD
+PORTBLDROOT?=${PORTSDIR}/build
+INSTALL_AS_USER=1
+.MAKEOVERRIDES+=PORTBLDROOT
+.MAKEOVERRIDES+=INSTALL_AS_USER
+.export INSTALL_AS_USER
+# Only use executables from base and from LOCALBASE
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin
+.export PATH
+.endif
+
+.ifdef PORTBLDROOT
+PKG_ARGS_ROOT=-r ${PORTBLDROOT}
+.endif
+
 LANG=		C
 LC_ALL=		C
 .export		LANG LC_ALL
@@ -2184,7 +2199,7 @@ PKG_SUFX?=		.tar
 PKG_SUFX?=		.txz
 .endif
 # where pkg(8) stores its data
-PKG_DBDIR?=		/var/db/pkg
+PKG_DBDIR?=		${PORTBLDROOT}/var/db/pkg
 
 ALL_TARGET?=		all
 INSTALL_TARGET?=	install
@@ -3970,6 +3985,7 @@ ${deptype:tl}-depends:
 		PORTSDIR="${PORTSDIR}" \
 		dp_MAKE="${MAKE}" \
 		dp_MAKEFLAGS='${.MAKEFLAGS}' \
+		dp_PORTBLDROOT="${PORTBLDROOT}" \
 		${SH} ${SCRIPTSDIR}/do-depends.sh
 .endif
 .endfor

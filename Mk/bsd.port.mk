@@ -1796,7 +1796,6 @@ MAKE_ENV+=	NO_PIE=yes
 MAKE_ENV+=	MK_DEBUG_FILES=no
 MAKE_ENV+=	MK_KERNEL_SYMBOLS=no
 
-# <theron> hook here to do configure and make in separated environment
 CONFIGURE_SHELL?=	${SH}
 MAKE_SHELL?=	${SH}
 

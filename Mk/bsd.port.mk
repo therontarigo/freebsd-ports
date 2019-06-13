@@ -1029,8 +1029,13 @@ INSTALL_AS_USER=1
 .MAKEOVERRIDES+=INSTALL_AS_USER
 .export INSTALL_AS_USER
 # Only use executables from base and from LOCALBASE
-PATH=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+PATH_CHROOTED=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin
 .export PATH
+.export PATH_CHROOTED
+CHROOT_ENV=WRKDIR=${WRKDIR} PATH_CHROOTED=${PATH_CHROOTED}
+CHROOT_DO=${CHROOT_ENV} ${SCRIPTSDIR}/chroot.sh cmd env
+WRKDIRPREFIX=/tmp/work
 .endif
 
 .ifdef PORTBLDROOT
@@ -1688,8 +1693,8 @@ WRKDIR?=		${WRKDIRPREFIX}${.CURDIR}/${_WRKDIR}
 BINARY_LINKDIR=	${WRKDIR}/.bin
 PATH:=			${BINARY_LINKDIR}:${PATH}
 .if !${MAKE_ENV:MPATH=*} && !${CONFIGURE_ENV:MPATH=*}
-MAKE_ENV+=			PATH=${PATH}
-CONFIGURE_ENV+=		PATH=${PATH}
+MAKE_ENV+=			PATH=${PATH_CHROOTED}
+CONFIGURE_ENV+=		PATH=${PATH_CHROOTED}
 .endif
 
 .if !defined(IGNORE_MASTER_SITE_GITHUB) && defined(USE_GITHUB) && empty(USE_GITHUB:Mnodefault)
@@ -1791,6 +1796,7 @@ MAKE_ENV+=	NO_PIE=yes
 MAKE_ENV+=	MK_DEBUG_FILES=no
 MAKE_ENV+=	MK_KERNEL_SYMBOLS=no
 
+# <theron> hook here to do configure and make in separated environment
 CONFIGURE_SHELL?=	${SH}
 MAKE_SHELL?=	${SH}
 
@@ -3221,7 +3227,7 @@ do-configure:
 	    INSTALL_LIB="${INSTALL_LIB}" \
 	    INSTALL_PROGRAM="${INSTALL_PROGRAM}" \
 	    INSTALL_SCRIPT="${INSTALL_SCRIPT}" \
-	    ${CONFIGURE_ENV} ${CONFIGURE_CMD} ${CONFIGURE_ARGS}; then \
+	    ${CHROOT_DO} ${CONFIGURE_ENV} ${CONFIGURE_CMD} ${CONFIGURE_ARGS}; then \
 			 ${ECHO_MSG} "===>  Script \"${CONFIGURE_SCRIPT}\" failed unexpectedly."; \
 			 (${ECHO_CMD} ${CONFIGURE_FAIL_MESSAGE}) | ${FMT_80} ; \
 			 ${FALSE}; \
@@ -3234,7 +3240,7 @@ do-configure:
 DO_MAKE_BUILD?=	${SETENV} ${MAKE_ENV} ${MAKE_CMD} ${MAKE_FLAGS} ${MAKEFILE} ${_MAKE_JOBS} ${MAKE_ARGS:C,^${DESTDIRNAME}=.*,,g}
 .if !target(do-build)
 do-build:
-	@(cd ${BUILD_WRKSRC}; if ! ${DO_MAKE_BUILD} ${ALL_TARGET}; then \
+	@(cd ${BUILD_WRKSRC}; if ! ${CHROOT_DO} ${DO_MAKE_BUILD} ${ALL_TARGET}; then \
 		if [ -n "${BUILD_FAIL_MESSAGE}" ] ; then \
 			${ECHO_MSG} "===> Compilation failed unexpectedly."; \
 			(${ECHO_CMD} "${BUILD_FAIL_MESSAGE}") | ${FMT_80} ; \
@@ -3345,7 +3351,7 @@ check-install-conflicts:
 
 .if !target(do-install) && !defined(NO_INSTALL)
 do-install:
-	@(cd ${INSTALL_WRKSRC} && ${SETENV} ${MAKE_ENV} ${FAKEROOT} ${MAKE_CMD} ${MAKE_FLAGS} ${MAKEFILE} ${MAKE_ARGS} ${INSTALL_TARGET})
+	@(cd ${INSTALL_WRKSRC} && ${CHROOT_DO} ${SETENV} ${MAKE_ENV} ${FAKEROOT} ${MAKE_CMD} ${MAKE_FLAGS} ${MAKEFILE} ${MAKE_ARGS} ${INSTALL_TARGET})
 .endif
 
 # Test

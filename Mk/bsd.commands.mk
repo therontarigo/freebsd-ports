@@ -120,7 +120,7 @@ ECHO_MSG?=		${ECHO_CMD}
 
 .elif !defined(_PKGTOOLSDEFINED)
 _PKGTOOLSDEFINED=	yes
-PKG_BIN?=		${LOCALBASE}/sbin/pkg-static
+PKG_BIN?=		${PORTBLDROOT}${LOCALBASE}/sbin/pkg-static
 PKG_REGISTER?=		${PKG_BIN} ${PKG_ARGS_ROOT} register
 PKG_DELETE?=		${PKG_BIN} ${PKG_ARGS_ROOT} delete -y
 PKG_INFO?=		${PKG_BIN} ${PKG_ARGS_ROOT} info -g

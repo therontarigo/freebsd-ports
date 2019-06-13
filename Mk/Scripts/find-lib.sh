@@ -9,6 +9,7 @@ if [ -z "${LIB_DIRS}" -o -z "${LOCALBASE}" ]; then
 	exit 1
 fi
 
+# Don't need to check in $PORTBLDROOT for a file which has been obsolete before PORTBLDROOT existed
 if [ -f /usr/share/misc/magic.mime -o -f /usr/share/misc/magic.mime.mgc ]; then
 	echo >&2
 	echo "Either /usr/share/misc/magic.mime or /usr/share/misc/magic.mime.mgc exist and must be removed." >&2
@@ -22,11 +23,11 @@ if [ $# -ne 1 ]; then
 fi
 
 lib=$1
-dirs="${LIB_DIRS} $(cat ${LOCALBASE}/libdata/ldconfig/* 2>/dev/null || :)"
+dirs="${LIB_DIRS} $(cat ${PORTBLDROOT}${LOCALBASE}/libdata/ldconfig/* 2>/dev/null || :)"
 
 for libdir in ${dirs} ; do
-	test -f ${libdir}/${lib} || continue
-	libfile=${libdir}/${lib}
+	test -f ${PORTBLDROOT}${libdir}/${lib} || continue
+	libfile=${PORTBLDROOT}${libdir}/${lib}
 	[ "$(/usr/bin/file -b -L --mime-type ${libfile})" = "application/x-sharedlib" ] || continue
 	echo $libfile
 	break

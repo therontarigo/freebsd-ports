@@ -74,7 +74,7 @@ find_file_path()
 {
 	echo "===>   ${dp_PKGNAME} depends on executable: $1"
 	#echo "UNIMPLEMENTED"; return 1
-	if which -s $1 ; then
+	if PATH=/sbin:/bin:/usr/sbin:/usr/bin:$PORTBLDROOT$LOCALBASE/sbin:$PORTBLDROOT$LOCALBASE/bin which -s $1 ; then
 		echo "===>   ${dp_PKGNAME} depends on executable: $1 - found"
 		return 0
 	fi
@@ -86,7 +86,7 @@ find_lib()
 {
 	echo -n "===>   ${dp_PKGNAME} depends on shared library: $1"
 	#echo "UNIMPLEMENTED"; return 1
-	libfile=$(env -i PATH="${PATH}" LIB_DIRS="${dp_LIB_DIRS}" LOCALBASE="${dp_LOCALBASE}" ${dp_SH} ${dp_SCRIPTSDIR}/find-lib.sh $1)
+	libfile=$(env -i PATH="${PATH}" PORTBLDROOT="${dp_PORTBLDROOT}" LIB_DIRS="${dp_LIB_DIRS}" LOCALBASE="${dp_LOCALBASE}" ${dp_SH} ${dp_SCRIPTSDIR}/find-lib.sh $1)
 	if [ -z "${libfile}" ]; then
 		echo " - not found"
 		return 1

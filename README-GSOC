@@ -1,0 +1,21 @@
+
+
+See changes added by this (GSoC) project:
+    $ git diff f2e513ea5bd3d9a611441ede0d718f4cdf50ab9f
+
+Test the separated build: (run as non-root user)
+    Turn on the new mode:
+    $ export PORTS_SEPARATED_BUILD=1
+
+    Allow to work in checked-out location:
+    $ export PORTSDIR=$PWD
+    $ export PORT_DBDIR=$PWD/portdb
+
+    Avoid anything trying to read /usr/local (that should be an error):
+    $ export LOCALBASE=/usr/nlocal
+
+    Build something:
+    $ make -C devel/gmake
+    (asks for su password several times, due to usage of chroot, which will be
+    removed)
+

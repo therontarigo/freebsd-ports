@@ -48,7 +48,9 @@ do-extract:
 	@${RM} -r ${WRKDIR}/nss-${VERSION_NSS}
 
 do-build:	apply-slist
-	@${SETENV} PATH=${LOCALBASE}/bin:$${PATH} \
+#<theron> Why overriding base path with localbase ?
+#	@${SETENV} PATH=${LOCALBASE}/bin:$${PATH}
+	@${CHROOT_DO} ${SETENV} PATH=${LOCALBASE}/bin:$${PATH} \
 		${PERL} ${WRKDIR}/${BUNDLE_PROCESSOR} \
 	    < ${WRKDIR}/certdata.txt > \
 	    ${WRKDIR}/ca-root-nss.crt

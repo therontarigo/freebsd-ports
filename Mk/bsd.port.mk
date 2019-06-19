@@ -1023,6 +1023,7 @@ FreeBSD_MAINTAINER=	portmgr@FreeBSD.org
 #
 
 .ifdef PORTS_SEPARATED_BUILD
+
 PORTBLDROOT?=${PORTSDIR}/build
 INSTALL_AS_USER=1
 .MAKEOVERRIDES+=PORTBLDROOT
@@ -1033,10 +1034,47 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 PATH_CHROOTED=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin
 .export PATH
 .export PATH_CHROOTED
-CHROOT_ENV=WRKDIR=${WRKDIR} PATH_CHROOTED=${PATH_CHROOTED}
-CHROOT_DO=${CHROOT_ENV} ${SCRIPTSDIR}/chroot.sh cmd env
 WRKDIRPREFIX=/tmp/work
+
+PORTS_USE_CHROOT=1
+.if defined(PORTS_USE_CHROOT)
+
+CHROOT_ENV=WRKDIR=${WRKDIR} PATH_CHROOTED=${PATH_CHROOTED} PORTBLDROOT=${PORTBLDROOT}
+CHROOT_DO=${CHROOT_ENV} ${SCRIPTSDIR}/chroot.sh cmd env
+
+.if !target(chroot-create)
+chroot-create:
+.ifndef CHROOT_CREATED
+	@echo Creating chroot environment
+	@${SETENV} ${CHROOT_ENV} ${SCRIPTSDIR}/chroot.sh mount
+.else
+	@${TRUE}
 .endif
+
+chroot-destroy:
+.ifndef CHROOT_CREATED
+	@echo Cleaning up chroot environment
+	@${SETENV} ${CHROOT_ENV} ${SCRIPTSDIR}/chroot.sh unmount
+.else
+	@${TRUE}
+.endif
+.endif
+
+CHROOT_CREATED=1
+.export CHROOT_CREATED
+
+.BEGIN: chroot-create
+.END: chroot-destroy
+.ERROR: chroot-destroy
+.INTERRUPT: chroot-destroy
+
+.endif # !target(chroot-create)
+
+.else # !defined(PORTS_USE_CHROOT)
+
+# Use interception lib instead of chroot hacks
+
+.endif # defined(PORTS_USE_CHROOT)
 
 .ifdef PORTBLDROOT
 PKG_ARGS_ROOT=-r ${PORTBLDROOT}
@@ -2624,25 +2662,31 @@ CONFIGURE_ARGS+=	--host=${CROSS_HOST}
 CONFIGURE_ENV+=		CONFIG_SITE=${CONFIG_SITE} lt_cv_sys_max_cmd_len=${CONFIGURE_MAX_CMD_LEN}
 HAS_CONFIGURE=		yes
 
+# <theron> Use temporary file instead of re-running command
+# This whole mess should be moved to a script!
 SET_LATE_CONFIGURE_ARGS= \
+     _CONFIGURE_HELP_F=$$(${SETENV} TMPDIR=${WRKDIR} mktemp); \
+     _CONFIGURE_VERSION_F=$$(${SETENV} TMPDIR=${WRKDIR} mktemp); \
+     ${CHROOT_DO} ${SH} -c "${CONFIGURE_CMD} --help 2>&1 > $${_CONFIGURE_HELP_F}"; \
+     ${CHROOT_DO} ${SH} -c "${CONFIGURE_CMD} --version 2>&1 > $${_CONFIGURE_VERSION_F}"; \
      _LATE_CONFIGURE_ARGS="" ; \
 	if [ -z "${CONFIGURE_ARGS:M--localstatedir=*:Q}" ] && \
-	   ${CONFIGURE_CMD} --help 2>&1 | ${GREP} -- --localstatedir > /dev/null; then \
+	   ${GREP} -- --localstatedir $${_CONFIGURE_HELP_F} > /dev/null; then \
 	    _LATE_CONFIGURE_ARGS="$${_LATE_CONFIGURE_ARGS} --localstatedir=/var" ; \
 	fi ; \
-	if [ ! -z "`${CONFIGURE_CMD} --help 2>&1 | ${GREP} -- '--mandir'`" ]; then \
+	if [ ! -z "`${GREP} -- '--mandir' $${_CONFIGURE_HELP_F}`" ]; then \
 	    _LATE_CONFIGURE_ARGS="$${_LATE_CONFIGURE_ARGS} --mandir=${GNU_CONFIGURE_MANPREFIX}/man" ; \
 	fi ; \
-	if [ ! -z "`${CONFIGURE_CMD} --help 2>&1 | ${GREP} -- '--disable-silent-rules'`" ]; then \
+	if [ ! -z "`${GREP} -- '--disable-silent-rules' $${_CONFIGURE_HELP_F}`" ]; then \
 	    _LATE_CONFIGURE_ARGS="$${_LATE_CONFIGURE_ARGS} --disable-silent-rules" ; \
 	fi ; \
-	if [ ! -z "`${CONFIGURE_CMD} --help 2>&1 | ${GREP} -- '--enable-jobserver\[.*\#\]'`" ]; then \
+	if [ ! -z "`${GREP} -- '--enable-jobserver\[.*\#\]' $${_CONFIGURE_HELP_F}`" ]; then \
 	    _LATE_CONFIGURE_ARGS="$${_LATE_CONFIGURE_ARGS} --enable-jobserver=${MAKE_JOBS_NUMBER}" ; \
 	fi ; \
-	if [ ! -z "`${CONFIGURE_CMD} --help 2>&1 | ${GREP} -- '--infodir'`" ]; then \
+	if [ ! -z "`${GREP} -- '--infodir' $${_CONFIGURE_HELP_F}`" ]; then \
 	    _LATE_CONFIGURE_ARGS="$${_LATE_CONFIGURE_ARGS} --infodir=${GNU_CONFIGURE_PREFIX}/${INFO_PATH}/${INFO_SUBDIR}" ; \
 	fi ; \
-	if [ -z "`${CONFIGURE_CMD} --version 2>&1 | ${EGREP} -i '(autoconf.*2\.13|Unrecognized option)'`" ]; then \
+	if [ -z "`${EGREP} -i '(autoconf.*2\.13|Unrecognized option)' $${_CONFIGURE_VERSION_F}`" ]; then \
 		_LATE_CONFIGURE_ARGS="$${_LATE_CONFIGURE_ARGS} --build=${CONFIGURE_TARGET}" ; \
 	else \
 		_LATE_CONFIGURE_ARGS="$${_LATE_CONFIGURE_ARGS} ${CONFIGURE_TARGET}" ; \

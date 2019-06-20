@@ -73,6 +73,4 @@ pre-patch:
 			   s,i?86|x86_64),i?86|amd64|x86_64),g' \
 		${WRKSRC}/configure
 
-.warning "${.ALLTARGETS}"
-
 .include <bsd.port.mk>

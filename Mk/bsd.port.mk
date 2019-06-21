@@ -1036,7 +1036,6 @@ PATH_CHROOTED=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin
 .export PATH_CHROOTED
 WRKDIRPREFIX=/tmp/work
 
-PORTS_USE_CHROOT=1
 .if defined(PORTS_USE_CHROOT)
 
 CHROOT_ENV=WRKDIR=${WRKDIR} PATH_CHROOTED=${PATH_CHROOTED} PORTBLDROOT=${PORTBLDROOT}
@@ -1058,7 +1057,6 @@ chroot-destroy:
 .else
 	@${TRUE}
 .endif
-.endif
 
 CHROOT_CREATED=1
 .export CHROOT_CREATED
@@ -1074,7 +1072,24 @@ CHROOT_CREATED=1
 
 # Use interception lib instead of chroot hacks
 
+INTERCEPT_ENV=
+INTERCEPT_ENV+=INTERCEPT_LOG_CALLS=1
+INTERCEPT_ENV+=INTERCEPT_LOG_PATHMAP=1
+INTERCEPT_ENV+=INTERCEPT_DBGLOGFILE=/tmp/intercept.log
+INTERCEPT_ENV+=FILEPATHMAP=${LOCALBASE}%${PORTBLDROOT}${LOCALBASE}:/%/
+INTERCEPT_ENV+=LD_PRELOAD=/usr/home/theron/devel/fakens/intercept.so
+CHROOT_DO=${SETENV} ${INTERCEPT_ENV} PATH=${PATH} env
+
 .endif # defined(PORTS_USE_CHROOT)
+
+# runchrt: run command specified by setting CMD inside file redirection
+# environment
+.if !target(runchrt)
+runchrt:
+	${CHROOT_DO} ${CMD}
+.endif
+
+.endif # defined(PORTS_SEPARATED_BUILD)
 
 .ifdef PORTBLDROOT
 PKG_ARGS_ROOT=-r ${PORTBLDROOT}

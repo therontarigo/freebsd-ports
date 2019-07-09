@@ -1,0 +1,10 @@
+Intercepts libc filesystem operations to hide the real filesystem from the
+process and provide instead a configurable namespace mapping virtual locations
+to real locations.
+
+This library cannot be used to restrict access to the underlying filesystem; a
+program may trivially work around the interception mechanism.
+This tool is not intended for use by superuser; superuser-only syscalls are not
+supported.
+
+WWW: https://github.com/therontarigo/freebsd-user-namespace

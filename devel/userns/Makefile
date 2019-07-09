@@ -1,7 +1,7 @@
 
 PORTNAME=	userns
 PORTVERSION=	0.0.1
-PORTREVISION=	0
+PORTREVISION=	1
 CATEGORIES=	devel
 
 MAINTAINER=	theron@FreeBSD.org
@@ -12,6 +12,6 @@ LICENSE=	BSD2CLAUSE
 USE_GITHUB=	yes
 GH_ACCOUNT=	therontarigo
 GH_PROJECT=	freebsd-user-namespace
-GH_TAGNAME=	8b11e8c97bb3b632141f4128f23a67c3aaabc795
+GH_TAGNAME=	e4f123538d6a7f5f86cbe1fcb07c9f131d095767
 
 .include <bsd.port.mk>

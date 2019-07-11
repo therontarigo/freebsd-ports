@@ -109,6 +109,9 @@ USE_LDCONFIG=	${PREFIX}/${_ARCH_LIB}/CORE
 
 CONFIGURE_ENV+=	UNAME_v="$$(uname -v | sed 'y/=/ /')"
 
+# Fix for bmake lacking ECHO
+MAKE_ARGS+=ECHO=${ECHO}
+
 SUB_LIST+=	PERL_VERSION=${PERL_VERSION} \
 		PERL_VER=${PERL_VER} \
 		SITE_PERL=${SITE_PERL_REL} \

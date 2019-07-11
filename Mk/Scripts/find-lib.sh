@@ -27,8 +27,9 @@ dirs="${LIB_DIRS} $(cat ${PORTBLDROOT}${LOCALBASE}/libdata/ldconfig/* 2>/dev/nul
 
 for libdir in ${dirs} ; do
 	test -f ${PORTBLDROOT}${libdir}/${lib} || continue
-	libfile=${PORTBLDROOT}${libdir}/${lib}
-	[ "$(/usr/bin/file -b -L --mime-type ${libfile})" = "application/x-sharedlib" ] || continue
-	echo $libfile
+	libfile=${libdir}/${lib}
+	libfile_realpath=${PORTBLDROOT}${libfile}
+	[ "$(/usr/bin/file -b -L --mime-type ${libfile_realpath})" = "application/x-sharedlib" ] || continue
+	printf %s\\n $libfile
 	break
 done

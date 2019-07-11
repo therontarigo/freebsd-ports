@@ -9,6 +9,9 @@ if [ -z "${PKG_BIN}" ]; then
 	exit 1
 fi
 
+[ -n "${PORTBLDROOT}" ] || PORTBLDROOT=/
+PKGCMD="${PKG_BIN} -r ${PORTBLDROOT}"
+
 resolv_symlink() {
 	local file tgt
 	file=${1}
@@ -45,14 +48,14 @@ absolute_path() {
 		*) target="${target}/${el}" ;;
 		esac
 	done
-	echo ${target}
+	printf %s\\n ${target}
 }
 
 find_dep() {
 	pattern=$1
 	case ${pattern} in
 	*\>*|*\<*|*=*)
-		${PKG_BIN} info -Eg "${pattern}" 2>/dev/null ||
+		${PKGCMD} info -Eg "${pattern}" 2>/dev/null ||
 			echo "actual-package-depends: dependency on ${pattern} not registered" >&2
 		return
 		;;
@@ -64,11 +67,11 @@ find_dep() {
 		;;
 	esac
 	if [ -n "${searchfile}" ]; then
-		${PKG_BIN} which -q ${searchfile} || ${PKG_BIN} which -q "$(resolv_symlink ${searchfile} 2>/dev/null)" ||
+		${PKGCMD} which -q ${searchfile} || ${PKGCMD} which -q "$(resolv_symlink ${searchfile} 2>/dev/null)" ||
 			echo "actual-package-depends: dependency on ${searchfile} not registered (normal if it belongs to base)" >&2
 	fi
 }
 
 for lookup; do
-	${PKG_BIN} query "\"%n\": {origin: \"%o\", version: \"%v\"}" "$(find_dep ${lookup})" || :
+	${PKGCMD} query "\"%n\": {origin: \"%o\", version: \"%v\"}" "$(find_dep ${lookup})" || :
 done

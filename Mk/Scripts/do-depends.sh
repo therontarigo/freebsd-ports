@@ -11,7 +11,7 @@ validate_env dp_RAWDEPENDS dp_DEPTYPE dp_DEPENDS_TARGET dp_DEPENDS_PRECLEAN \
 	dp_DEPENDS_CLEAN dp_DEPENDS_ARGS dp_USE_PACKAGE_DEPENDS \
 	dp_USE_PACKAGE_DEPENDS_ONLY dp_PKG_ADD dp_PKG_INFO dp_WRKDIR \
 	dp_PKGNAME dp_STRICT_DEPENDS dp_LOCALBASE dp_LIB_DIRS dp_SH \
-	dp_SCRIPTSDIR PORTSDIR dp_MAKE dp_MAKEFLAGS
+	dp_SCRIPTSDIR PORTSDIR dp_MAKE dp_MAKEFLAGS dp_PKG_ARGS_ROOT
 
 [ -n "${DEBUG_MK_SCRIPTS}" -o -n "${DEBUG_MK_SCRIPTS_DO_DEPENDS}" ] && set -x
 
@@ -36,7 +36,7 @@ install_depends()
 		if [ "${pkgbase}" = "pkg" ]; then
 			[ -d ${dp_WRKDIR} ] || mkdir -p ${dp_WRKDIR}
 			tar xf ${pkgfile} -C ${dp_WRKDIR} -s ",/.*/,,g" "*/pkg-static"
-			${dp_WRKDIR}/pkg-static add ${pkgfile}
+			${dp_WRKDIR}/pkg-static ${dp_PKG_ARGS_ROOT} add ${pkgfile}
 			rm -f ${dp_WRKDIR}/pkg-static
 		else
 			${dp_PKG_ADD} -A ${pkgfile}

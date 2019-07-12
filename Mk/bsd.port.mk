@@ -1034,7 +1034,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 PATH_CHROOTED=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin
 .export PATH
 .export PATH_CHROOTED
-WRKDIRPREFIX=/tmp/work
+WRKDIRPREFIX?=/tmp/work
 
 .if defined(PORTS_USE_CHROOT)
 
@@ -1070,17 +1070,74 @@ CHROOT_CREATED=1
 
 .else # !defined(PORTS_USE_CHROOT)
 
+USERNS_INSTALL?=${PORTBLDROOT}${LOCALBASE}/libexec/userns
+INTERCEPTLIB=${USERNS_INSTALL}/intercept.so
+
 # Use interception lib instead of chroot hacks
 
+PATHMAP=
+.for bin in cpp cc c++
+PATHMAP+=/usr/bin/${bin}%${USERNS_INSTALL}/cc
+.endfor
+.if ("${PORTNAME}" != "bmake") && ("${PORTNAME}" != "pkg")
+PATHMAP+=/usr/bin/make%${PORTBLDROOT}${LOCALBASE}/bin/bmake
+.endif
+PATHMAP+=${LOCALBASE}%${PORTBLDROOT}${LOCALBASE}
+# use discrete ldconfig
+PATHMAP+=/var/run/%${PORTBLDROOT}/var/run/
+# trap attempts to read real /usr/local
+.ifndef NOHIDELOCAL
+PATHMAP+=/usr/local%/nonexistant
+.endif
+# fall through all others to local filesystem (for base installation)
+PATHMAP+=/%/
+
+# to fix: find out why NLSPATH was needed and remove it.
+NLSPATH=/usr/share/nls/%L/%N.cat:/usr/share/nls/%N/%L:${LOCALBASE}/share/nls/%L/%N.cat:${LOCALBASE}/share/nls/%N/%L
+
 INTERCEPT_ENV=
+.ifdef INTERCEPT_DBG
 INTERCEPT_ENV+=INTERCEPT_LOG_CALLS=1
 INTERCEPT_ENV+=INTERCEPT_LOG_PATHMAP=1
-INTERCEPT_ENV+=INTERCEPT_DBGLOGFILE=/tmp/intercept.log
-INTERCEPT_ENV+=FILEPATHMAP=${LOCALBASE}%${PORTBLDROOT}${LOCALBASE}:/%/
-INTERCEPT_ENV+=LD_PRELOAD=/usr/home/theron/devel/fakens/intercept.so
-CHROOT_DO=${SETENV} ${INTERCEPT_ENV} PATH=${PATH} env
+INTERCEPT_ENV+=INTERCEPT_DBGLOGFILE=${INTERCEPT_DBG}
+.endif
+INTERCEPT_ENV+=FILEPATHMAP=${PATHMAP:ts:}
+INTERCEPT_ENV+=LD_PRELOAD=${INTERCEPTLIB}
+INTERCEPT_ENV+=NLSPATH=${NLSPATH}
+INTERCEPT_ENV+=LD_ELF_HINTS_PATH=${PORTBLDROOT}/var/run/ld-elf.so.hints
+INTERCEPT_CC_MAP=${LOCALBASE}%${PORTBLDROOT}${LOCALBASE}
+.export INTERCEPT_CC_MAP
+.if ("${PORTNAME}" != "bmake") && ("${PORTNAME}" != "pkg") && \
+    ("${PORTNAME}" != "userns")
+CHROOT_DO=${SETENV} ${INTERCEPT_ENV} PATH=${PATH_CHROOTED} env
+.endif
 
-.endif # defined(PORTS_USE_CHROOT)
+# if using intercept lib, make sure bmake is installed
+BMAKE_ORIGIN?=devel/bmake
+USERNS_ORIGIN?=devel/userns
+.if ("${PORTNAME}" != "bmake") && ("${PORTNAME}" != "pkg") && \
+    ("${PORTNAME}" != "userns")
+BUILD_DEPENDS+=	${LOCALBASE}/bin/bmake:${BMAKE_ORIGIN}
+BUILD_DEPENDS+=	${LOCALBASE}/libexec/userns/intercept.so:${USERNS_ORIGIN}
+.endif
+
+.if !target(${PORTBLDROOT})
+${PORTBLDROOT}:
+	${MKDIR} ${.TARGET}
+.endif
+
+.if !target(portbld-prepare-install)
+portbld-prepare-install: ${PORTBLDROOT}
+.endif
+
+# leverage existing /etc/rc.d/ldconfig
+PATHMAP_LDCONFIG=/usr/local/etc/rc.conf.d/%${PORTBLDROOT}${LOCALBASE}/etc/rc.conf.d/ ${PATHMAP}
+PORTBLD_DO_LDCONFIG= ( \
+	${MKDIR} "${PORTBLDROOT}/var/run" && \
+	${SETENV} LOCALBASE=${LOCALBASE} PORTBLDROOT=${PORTBLDROOT} ${SCRIPTSDIR}/ldconfig.sh \
+	)
+
+.endif # !defined(PORTS_USE_CHROOT)
 
 # runchrt: run command specified by setting CMD inside file redirection
 # environment
@@ -3541,7 +3598,8 @@ install-ldconfig-file:
 .  if defined(USE_LDCONFIG) || defined(USE_LDCONFIG32)
 .    if defined(USE_LDCONFIG)
 .      if !defined(USE_LINUX_PREFIX)
-.        if ${USE_LDCONFIG} != "${LOCALBASE}/lib" && !defined(INSTALL_AS_USER)
+                                            # <theron> why can't have ldconfig file created with INSTALL_AS_USER?
+.        if ${USE_LDCONFIG} != "${LOCALBASE}/lib" && ( !defined(INSTALL_AS_USER) || defined(PORTS_SEPARATED_BUILD) )
 	@${ECHO_MSG} "===>   Installing ldconfig configuration file"
 .          if defined(NO_MTREE) || ${PREFIX} != ${LOCALBASE}
 	@${MKDIR} ${STAGEDIR}${LOCALBASE}/${LDCONFIG_DIR}
@@ -4026,7 +4084,7 @@ package-noinstall: package
 depends: pkg-depends extract-depends patch-depends lib-depends fetch-depends build-depends run-depends
 
 .for deptype in PKG EXTRACT PATCH FETCH BUILD LIB RUN TEST
-${deptype:tl}-depends:
+${deptype:tl}-depends: ${PORTBLDROOT}
 .if defined(${deptype}_DEPENDS) && !defined(NO_DEPENDS)
 	@${SETENV} \
 		dp_RAWDEPENDS="${${deptype}_DEPENDS}" \
@@ -4050,7 +4108,9 @@ ${deptype:tl}-depends:
 		dp_MAKE="${MAKE}" \
 		dp_MAKEFLAGS='${.MAKEFLAGS}' \
 		dp_PORTBLDROOT="${PORTBLDROOT}" \
-		${SH} ${SCRIPTSDIR}/do-depends.sh
+		dp_PKG_ARGS_ROOT="${PKG_ARGS_ROOT}" \
+		${SH} ${SCRIPTSDIR}/do-depends.sh && \
+		${PORTBLD_DO_LDCONFIG}
 .endif
 .endfor
 
@@ -4556,6 +4616,8 @@ generate-plist: ${WRKDIR}
 	@${ECHO_CMD} "@postexec /usr/sbin/service ldconfig restart > /dev/null" >> ${TMPPLIST}
 	@${ECHO_CMD} "@postunexec /usr/sbin/service ldconfig restart > /dev/null" >> ${TMPPLIST}
 .else
+	# <theron> This is bad, INSTALL_AS_USER shouldn't affect how the package is generated
+	# how to fix: two plists - one for package - other for temp build install
 	@${ECHO_CMD} "@postexec /usr/sbin/service ldconfig restart > /dev/null || ${TRUE}" >> ${TMPPLIST}
 	@${ECHO_CMD} "@postunexec /usr/sbin/service ldconfig restart > /dev/null || ${TRUE}" >> ${TMPPLIST}
 .endif
@@ -4743,10 +4805,12 @@ fake-pkg:
 	@${ECHO_MSG} "===>   Registering installation for ${PKGNAME}"
 .endif
 .if defined(INSTALLS_DEPENDS)
+	# <theron> pkg-register(8): -d: enable debugging output.  Why?
 	@${SETENV} ${PKG_ENV} FORCE_POST="${_FORCE_POST_PATTERNS}" ${PKG_REGISTER} -d ${STAGE_ARGS} -m ${METADIR} -f ${TMPPLIST}
 .else
 	@${SETENV} ${PKG_ENV} FORCE_POST="${_FORCE_POST_PATTERNS}" ${PKG_REGISTER} ${STAGE_ARGS} -m ${METADIR} -f ${TMPPLIST}
 .endif
+	@${PORTBLD_DO_LDCONFIG}
 	@${RM} -r ${METADIR}
 .endif
 .endif
@@ -5322,8 +5386,9 @@ _TEST_DEP=		stage
 _TEST_SEQ=		100:test-message 150:test-depends 300:pre-test 500:do-test \
 				800:post-test \
 				${_OPTIONS_test} ${_USES_test}
-_INSTALL_DEP=	stage
-_INSTALL_SEQ=	100:install-message \
+_INSTALL_DEP=	stage portbld-prepare-install
+_INSTALL_SEQ=	 50:portbld-prepare-install \
+				100:install-message \
 				200:check-already-installed \
 				300:create-manifest
 _INSTALL_SUSEQ=	400:fake-pkg 500:security-check

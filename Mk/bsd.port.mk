@@ -1036,40 +1036,6 @@ PATH_CHROOTED=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin
 .export PATH_CHROOTED
 WRKDIRPREFIX?=/tmp/work
 
-.if defined(PORTS_USE_CHROOT)
-
-CHROOT_ENV=WRKDIR=${WRKDIR} PATH_CHROOTED=${PATH_CHROOTED} PORTBLDROOT=${PORTBLDROOT}
-CHROOT_DO=${CHROOT_ENV} ${SCRIPTSDIR}/chroot.sh cmd env
-
-.if !target(chroot-create)
-chroot-create:
-.ifndef CHROOT_CREATED
-	@echo Creating chroot environment
-	@${SETENV} ${CHROOT_ENV} ${SCRIPTSDIR}/chroot.sh mount
-.else
-	@${TRUE}
-.endif
-
-chroot-destroy:
-.ifndef CHROOT_CREATED
-	@echo Cleaning up chroot environment
-	@${SETENV} ${CHROOT_ENV} ${SCRIPTSDIR}/chroot.sh unmount
-.else
-	@${TRUE}
-.endif
-
-CHROOT_CREATED=1
-.export CHROOT_CREATED
-
-.BEGIN: chroot-create
-.END: chroot-destroy
-.ERROR: chroot-destroy
-.INTERRUPT: chroot-destroy
-
-.endif # !target(chroot-create)
-
-.else # !defined(PORTS_USE_CHROOT)
-
 USERNS_INSTALL?=${PORTBLDROOT}${LOCALBASE}/libexec/userns
 INTERCEPTLIB=${USERNS_INSTALL}/intercept.so
 
@@ -1136,8 +1102,6 @@ PORTBLD_DO_LDCONFIG= ( \
 	${MKDIR} "${PORTBLDROOT}/var/run" && \
 	${SETENV} LOCALBASE=${LOCALBASE} PORTBLDROOT=${PORTBLDROOT} ${SCRIPTSDIR}/ldconfig.sh \
 	)
-
-.endif # !defined(PORTS_USE_CHROOT)
 
 # runchrt: run command specified by setting CMD inside file redirection
 # environment

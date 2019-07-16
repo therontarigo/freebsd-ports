@@ -1110,11 +1110,19 @@ runchrt:
 	${CHROOT_DO} ${CMD}
 .endif
 
+.else # !defined(PORTS_SEPARATED_BUILD)
+
+.if !target(${PORTBLDROOT})
+portbld-prepare-install:
+.endif
+
 .endif # defined(PORTS_SEPARATED_BUILD)
 
 .ifdef PORTBLDROOT
 PKG_ARGS_ROOT=-r ${PORTBLDROOT}
 .endif
+
+PATH_CHROOTED?=${PATH}
 
 LANG=		C
 LC_ALL=		C
@@ -4073,7 +4081,7 @@ ${deptype:tl}-depends: ${PORTBLDROOT}
 		dp_MAKEFLAGS='${.MAKEFLAGS}' \
 		dp_PORTBLDROOT="${PORTBLDROOT}" \
 		dp_PKG_ARGS_ROOT="${PKG_ARGS_ROOT}" \
-		${SH} ${SCRIPTSDIR}/do-depends.sh && \
+		${SH} ${SCRIPTSDIR}/do-depends.sh
 		${PORTBLD_DO_LDCONFIG}
 .endif
 .endfor

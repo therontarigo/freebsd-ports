@@ -10,6 +10,11 @@ if [ -z "${PKG_BIN}" ]; then
 fi
 
 [ -n "${PORTBLDROOT}" ] || PORTBLDROOT=/
+
+# Have pkg always operate on PORTBLDROOT.
+# Some other scripts use the assumption that ${PKG_BIN} is a single file
+# pathname (as the name suggests).  Here, PKGCMD is defined, instead of
+# modifying PKG_BIN, to preserve consistency with that assumption.
 PKGCMD="${PKG_BIN} -r ${PORTBLDROOT}"
 
 resolv_symlink() {

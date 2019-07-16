@@ -1033,13 +1033,10 @@ INSTALL_AS_USER=1
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 PATH_CHROOTED=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin
 .export PATH
-.export PATH_CHROOTED
 WRKDIRPREFIX?=/tmp/work
 
 USERNS_INSTALL?=${PORTBLDROOT}${LOCALBASE}/libexec/userns
 INTERCEPTLIB=${USERNS_INSTALL}/intercept.so
-
-# Use interception lib instead of chroot hacks
 
 PATHMAP=
 .for bin in cpp cc c++
@@ -1096,8 +1093,6 @@ ${PORTBLDROOT}:
 portbld-prepare-install: ${PORTBLDROOT}
 .endif
 
-# leverage existing /etc/rc.d/ldconfig
-PATHMAP_LDCONFIG=/usr/local/etc/rc.conf.d/%${PORTBLDROOT}${LOCALBASE}/etc/rc.conf.d/ ${PATHMAP}
 PORTBLD_DO_LDCONFIG= ( \
 	${MKDIR} "${PORTBLDROOT}/var/run" && \
 	${SETENV} LOCALBASE=${LOCALBASE} PORTBLDROOT=${PORTBLDROOT} ${SCRIPTSDIR}/ldconfig.sh \
@@ -1107,7 +1102,7 @@ PORTBLD_DO_LDCONFIG= ( \
 # environment
 .if !target(runchrt)
 runchrt:
-	${CHROOT_DO} ${CMD}
+	@${CHROOT_DO} ${CMD}
 .endif
 
 .else # !defined(PORTS_SEPARATED_BUILD)

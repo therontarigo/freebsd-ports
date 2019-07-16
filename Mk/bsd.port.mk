@@ -1024,7 +1024,9 @@ FreeBSD_MAINTAINER=	portmgr@FreeBSD.org
 
 .ifdef PORTS_SEPARATED_BUILD
 
+# The location in which dependencies will be placed.
 PORTBLDROOT?=${PORTSDIR}/build
+# Allow pkg to work when using PORTS_SEPARATED_BUILD as non-root.
 INSTALL_AS_USER=1
 .MAKEOVERRIDES+=PORTBLDROOT
 .MAKEOVERRIDES+=INSTALL_AS_USER
@@ -1035,6 +1037,8 @@ PATH_CHROOTED=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin
 .export PATH
 WRKDIRPREFIX?=/tmp/work
 
+# devel/userns is assumed to be installed in PORTBLDROOT but this may be
+# overridden to test a developmental version of userns.
 USERNS_INSTALL?=${PORTBLDROOT}${LOCALBASE}/libexec/userns
 INTERCEPTLIB=${USERNS_INSTALL}/intercept.so
 
@@ -1043,10 +1047,19 @@ PATHMAP=
 PATHMAP+=/usr/bin/${bin}%${USERNS_INSTALL}/cc
 .endfor
 .if ("${PORTNAME}" != "bmake") && ("${PORTNAME}" != "pkg")
+# If building pkg or bmake, bmake can't possibly be already available, so do
+# not use it in those cases.
+# Otherwise, have bmake (quick to build and dynamically linked) appear as if it
+# is installed as the system's make.
+# Is it okay to assume PREFIX==LOCALBASE for bmake?
 PATHMAP+=/usr/bin/make%${PORTBLDROOT}${LOCALBASE}/bin/bmake
 .endif
+# Redirect all reads from ${LOCALBASE}, the primary location in which
+# dependency ports install their files.
 PATHMAP+=${LOCALBASE}%${PORTBLDROOT}${LOCALBASE}
-# use discrete ldconfig
+# Redirecting /var/run is primarily to direct ldconfig to save its hints file
+# in the PORTBLDROOT location.  Build tools should not need to access the
+# host's /var/run regardless.
 PATHMAP+=/var/run/%${PORTBLDROOT}/var/run/
 # trap attempts to read real /usr/local
 .ifndef NOHIDELOCAL
@@ -1060,18 +1073,25 @@ NLSPATH=/usr/share/nls/%L/%N.cat:/usr/share/nls/%N/%L:${LOCALBASE}/share/nls/%L/
 
 INTERCEPT_ENV=
 .ifdef INTERCEPT_DBG
+# Write all file-operation libc calls to file at ${INTERCEPT_DBG}
+# Produces _large_ output!
 INTERCEPT_ENV+=INTERCEPT_LOG_CALLS=1
 INTERCEPT_ENV+=INTERCEPT_LOG_PATHMAP=1
 INTERCEPT_ENV+=INTERCEPT_DBGLOGFILE=${INTERCEPT_DBG}
 .endif
+# FILEPATHMAP used by userns intercept.so is colon-separated list of mappings
 INTERCEPT_ENV+=FILEPATHMAP=${PATHMAP:ts:}
 INTERCEPT_ENV+=LD_PRELOAD=${INTERCEPTLIB}
 INTERCEPT_ENV+=NLSPATH=${NLSPATH}
 INTERCEPT_ENV+=LD_ELF_HINTS_PATH=${PORTBLDROOT}/var/run/ld-elf.so.hints
+# Instruct cc from userns to rewrite paths beginning with ${LOCALBASE} given in
+# the command arguments.
 INTERCEPT_CC_MAP=${LOCALBASE}%${PORTBLDROOT}${LOCALBASE}
 .export INTERCEPT_CC_MAP
 .if ("${PORTNAME}" != "bmake") && ("${PORTNAME}" != "pkg") && \
     ("${PORTNAME}" != "userns")
+# Check that the port being built is not one of these named, which must be
+# buildable before userns can be built.  Otherwise, use intercept lib.
 CHROOT_DO=${SETENV} ${INTERCEPT_ENV} PATH=${PATH_CHROOTED} env
 .endif
 
@@ -1080,19 +1100,24 @@ BMAKE_ORIGIN?=devel/bmake
 USERNS_ORIGIN?=devel/userns
 .if ("${PORTNAME}" != "bmake") && ("${PORTNAME}" != "pkg") && \
     ("${PORTNAME}" != "userns")
+# Add implicit dependency of all other ports on bmake and userns
 BUILD_DEPENDS+=	${LOCALBASE}/bin/bmake:${BMAKE_ORIGIN}
 BUILD_DEPENDS+=	${LOCALBASE}/libexec/userns/intercept.so:${USERNS_ORIGIN}
 .endif
 
+# Allow creation of the location in which dependencies will be placed.
 .if !target(${PORTBLDROOT})
 ${PORTBLDROOT}:
 	${MKDIR} ${.TARGET}
 .endif
 
+# Require dependency install location to exist before attempting installation.
 .if !target(portbld-prepare-install)
 portbld-prepare-install: ${PORTBLDROOT}
 .endif
 
+# Generate a ld-elf.so.hints to enable tools running from PORTBLDROOT to find
+# the appropriate shared objects, also in PORTBLDROOT.
 PORTBLD_DO_LDCONFIG= ( \
 	${MKDIR} "${PORTBLDROOT}/var/run" && \
 	${SETENV} LOCALBASE=${LOCALBASE} PORTBLDROOT=${PORTBLDROOT} ${SCRIPTSDIR}/ldconfig.sh \

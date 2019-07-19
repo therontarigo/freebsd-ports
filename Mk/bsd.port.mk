@@ -1023,9 +1023,11 @@ FreeBSD_MAINTAINER=	portmgr@FreeBSD.org
 #
 
 .ifdef PORTS_SEPARATED_BUILD
+# Always require a WRKDIRPREFIX (user may change it)
+WRKDIRPREFIX?=/tmp/ports
 
 # The location in which dependencies will be placed.
-PORTBLDROOT?=${PORTSDIR}/build
+PORTBLDROOT?=${WRKDIRPREFIX}/depsroot
 # Allow pkg to work when using PORTS_SEPARATED_BUILD as non-root.
 INSTALL_AS_USER=1
 .MAKEOVERRIDES+=PORTBLDROOT
@@ -1035,7 +1037,9 @@ INSTALL_AS_USER=1
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 PATH_CHROOTED=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin
 .export PATH
-WRKDIRPREFIX?=/tmp/work
+PORT_DBDIR?=${WRKDIRPREFIX}/portdb
+DISTDIR?=${WRKDIRPREFIX}/distfiles
+PACKAGES?=${WRKDIRPREFIX}/packages
 
 # devel/userns is assumed to be installed in PORTBLDROOT but this may be
 # overridden to test a developmental version of userns.
@@ -1111,6 +1115,15 @@ ${PORTBLDROOT}:
 	${MKDIR} ${.TARGET}
 .endif
 
+# Always use PACKAGES
+.if !target(${PACKAGES})
+${PACKAGES}:
+	${MKDIR} ${.TARGET}
+.endif
+.if !target(portbld-prepare-package)
+portbld-prepare-package: ${PACKAGES}
+.endif
+
 # Require dependency install location to exist before attempting installation.
 .if !target(portbld-prepare-install)
 portbld-prepare-install: ${PORTBLDROOT}
@@ -1134,6 +1147,10 @@ runchrt:
 
 .if !target(${PORTBLDROOT})
 portbld-prepare-install:
+.endif
+
+.if !target(${PORTBLDROOT})
+portbld-prepare-package:
 .endif
 
 .endif # defined(PORTS_SEPARATED_BUILD)
@@ -5385,7 +5402,8 @@ _INSTALL_SEQ=	 50:portbld-prepare-install \
 _INSTALL_SUSEQ=	400:fake-pkg 500:security-check
 
 _PACKAGE_DEP=	stage
-_PACKAGE_SEQ=	100:package-message 300:pre-package 450:pre-package-script \
+_PACKAGE_SEQ=	50:portbld-prepare-package \
+				100:package-message 300:pre-package 450:pre-package-script \
 				500:do-package 850:post-package-script \
 				${_OPTIONS_package} ${_USES_package}
 

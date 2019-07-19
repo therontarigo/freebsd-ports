@@ -1138,10 +1138,9 @@ portbld-prepare-install:
 
 .endif # defined(PORTS_SEPARATED_BUILD)
 
-.ifdef PORTBLDROOT
-PKG_ARGS_ROOT=-r ${PORTBLDROOT}
-.endif
+PORTBLDROOT?=/
 
+PKG_ARGS_ROOT=-r ${PORTBLDROOT}
 PATH_CHROOTED?=${PATH}
 
 LANG=		C
@@ -4352,9 +4351,9 @@ PACKAGE-DEPENDS-LIST?= \
 ACTUAL-PACKAGE-DEPENDS?= \
 	depfiles="" ; \
 	for lib in ${LIB_DEPENDS:C/\:.*//}; do \
-		depfiles="$$depfiles `${SETENV} LIB_DIRS="${LIB_DIRS}" LOCALBASE="${LOCALBASE}" ${SH} ${SCRIPTSDIR}/find-lib.sh $${lib}`" ; \
+		depfiles="$$depfiles `${SETENV} LIB_DIRS="${LIB_DIRS}" PORTBLDROOT="${PORTBLDROOT}" LOCALBASE="${LOCALBASE}" ${SH} ${SCRIPTSDIR}/find-lib.sh $${lib}`" ; \
 	done ; \
-	${SETENV} PKG_BIN="${PKG_BIN}" ${SH} ${SCRIPTSDIR}/actual-package-depends.sh $${depfiles} ${RUN_DEPENDS:C/(.*)\:.*/"\1"/}
+	${SETENV} PKG_BIN="${PKG_BIN}" PORTBLDROOT="${PORTBLDROOT}" LOCALBASE="${LOCALBASE}" ${SH} ${SCRIPTSDIR}/actual-package-depends.sh $${depfiles} ${RUN_DEPENDS:C/(.*)\:.*/"\1"/}
 
 PKG_NOTES_ENV?=
 .for note in ${PKG_NOTES}

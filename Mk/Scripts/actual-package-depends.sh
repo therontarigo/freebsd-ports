@@ -9,7 +9,10 @@ if [ -z "${PKG_BIN}" ]; then
 	exit 1
 fi
 
-[ -n "${PORTBLDROOT}" ] || PORTBLDROOT=/
+if [ -z "${PORTBLDROOT}" ]; then
+	echo "PORTBLDROOT required in environment." >&2
+	exit 1
+fi
 
 # Have pkg always operate on PORTBLDROOT.
 # Some other scripts use the assumption that ${PKG_BIN} is a single file
@@ -68,7 +71,7 @@ find_dep() {
 		searchfile=$pattern
 		;;
 	*)
-		searchfile=$(/usr/bin/which ${pattern} 2>/dev/null)
+		searchfile=$(env PATH="${PORTBLDROOT}${LOCALBASE}/sbin:${PORTBLDROOT}${LOCALBASE}/bin" /usr/bin/which ${pattern} 2>/dev/null | sed "s,^${PORTBLDROOT}/,/,")
 		;;
 	esac
 	if [ -n "${searchfile}" ]; then

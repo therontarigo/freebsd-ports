@@ -65,7 +65,7 @@ LUA_DEFAULT?=		5.2
 # Possible values: 5.5, 5.6, 5.7, 8.0, 5.5m, 10.0m, 10.1m, 10.2m, 10.3m, 5.5p, 5.6p, 5.7p, 5.6w
 MYSQL_DEFAULT?=		5.6
 # Possible values: 5.26, 5.28, 5.30, devel
-.if !exists(${LOCALBASE}/bin/perl) || (!defined(_PORTS_ENV_CHECK) && \
+.if !exists(${PORTBLDROOT}${LOCALBASE}/bin/perl) || (!defined(_PORTS_ENV_CHECK) && \
     defined(PACKAGE_BUILDING))
 PERL5_DEFAULT?=		5.28
 .elif !defined(PERL5_DEFAULT)
@@ -100,7 +100,8 @@ SAMBA_DEFAULT?=		4.7
 #	If no preference was set, check for an installed base version
 #	but give an installed port preference over it.
 .  if	!defined(SSL_DEFAULT) && \
-	!exists(${DESTDIR}/${LOCALBASE}/lib/libcrypto.so) && \
+	( defined(PORTBLDROOT) || \
+	  !exists(${DESTDIR}/${LOCALBASE}/lib/libcrypto.so) ) && \
 	exists(${DESTDIR}/usr/include/openssl/opensslv.h)
 SSL_DEFAULT=	base
 .  else

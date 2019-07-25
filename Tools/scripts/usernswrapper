@@ -1,0 +1,4 @@
+#!/bin/sh
+command=$(basename "$0")
+# 2nd env is needed for PATH resolution to occur inside the userns namespace
+exec env ${INTERCEPT_ENV} PATH="${PATH_CHROOTED}" env "$command" "$@"

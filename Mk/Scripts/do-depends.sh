@@ -11,7 +11,8 @@ validate_env dp_RAWDEPENDS dp_DEPTYPE dp_DEPENDS_TARGET dp_DEPENDS_PRECLEAN \
 	dp_DEPENDS_CLEAN dp_DEPENDS_ARGS dp_USE_PACKAGE_DEPENDS \
 	dp_USE_PACKAGE_DEPENDS_ONLY dp_PKG_ADD dp_PKG_INFO dp_WRKDIR \
 	dp_PKGNAME dp_STRICT_DEPENDS dp_LOCALBASE dp_LIB_DIRS dp_SH \
-	dp_SCRIPTSDIR PORTSDIR dp_MAKE dp_MAKEFLAGS dp_PKG_ARGS_ROOT
+	dp_SCRIPTSDIR PORTSDIR dp_MAKE dp_MAKEFLAGS dp_PKG_ARGS_ROOT \
+	dp_PORTSDIR
 
 [ -n "${DEBUG_MK_SCRIPTS}" -o -n "${DEBUG_MK_SCRIPTS_DO_DEPENDS}" ] && set -x
 
@@ -180,6 +181,15 @@ for _line in ${dp_RAWDEPENDS} ; do
 
 	# Now actually install the dependencies
 	install_depends "${origin}" "${target}" "${depends_args}"
+	if [ "${dp_PORTBLDROOT:-/}" != "/" ]; then
+	if [ "${fct}" = "find_file_path" ]; then
+		# The dependency is an executable and must be wrapped
+		mkdir -p "${dp_PORTBLDROOT}/.localbin"
+		[ -e "${dp_PORTBLDROOT}/usernswrapper" ] || \
+			cp "${dp_PORTSDIR}/Tools/scripts/usernswrapper" "${dp_PORTBLDROOT}/.localbin/usernswrapper"
+		ln -sf usernswrapper "${dp_PORTBLDROOT}/.localbin/${pattern}"
+	fi
+	fi
 	# Recheck if the installed dependency validates the pattern except for /nonexistent
 	[ "${fct}" = "false" ] || ${fct} "${pattern}"
 	echo "===>   Returning to build of ${dp_PKGNAME}"

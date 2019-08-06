@@ -1104,6 +1104,7 @@ INTERCEPT_CC_MAP=${LOCALBASE}%${PORTBLDROOT}${LOCALBASE}
 # Check that the port being built is not one of these named, which must be
 # buildable before userns can be built.  Otherwise, use intercept lib.
 CHROOT_DO=${SETENV} ${INTERCEPT_ENV} PATH=${PATH_CHROOTED} env
+PORTENV=${CHROOT_DO}
 .endif
 
 # if using intercept lib, make sure bmake is installed

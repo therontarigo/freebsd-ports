@@ -485,8 +485,8 @@ PYTHON_REL=	${PYTHON_PORTVERSION:C/^([0-9]+\.[0-9]+\.[0-9]+).*/\1/:C/\.([0-9]+)$
 # Might be overridden by calling ports
 PYTHON_CMD?=		${_PYTHON_BASECMD}${_PYTHON_VERSION}
 .if ${PYTHON_VER} != 2.7
-.if exists(${PYTHON_CMD}-config)
-PYTHON_ABIVER!=		${PYTHON_CMD}-config --abiflags
+.if exists(${PORTBLDROOT}${PYTHON_CMD}-config)
+PYTHON_ABIVER!=		${PORTENV} ${PYTHON_CMD}-config --abiflags
 .else
 # Default ABI flags for lang/python3x ports
 PYTHON_ABIVER=		m
@@ -632,7 +632,7 @@ add-plist-pymod:
 # When Python version is 3.2+ we rewrite all the filenames
 # of TMPPLIST that end with .py[co], so that they conform
 # to PEP 3147 (see https://www.python.org/dev/peps/pep-3147/)
-PYMAGICTAG=		${PYTHON_CMD} -c 'import sys; print(sys.implementation.cache_tag)'
+PYMAGICTAG=		${PORTENV} ${PYTHON_CMD} -c 'import sys; print(sys.implementation.cache_tag)'
 _USES_stage+=	935:add-plist-python
 add-plist-python:
 	@${AWK} '\
@@ -730,17 +730,17 @@ MAKE_ENV+=	LDSHARED="${LDSHARED}" PYTHONDONTWRITEBYTECODE= PYTHONOPTIMIZE=
 
 .if !target(do-configure) && !defined(HAS_CONFIGURE) && !defined(GNU_CONFIGURE)
 do-configure:
-	@(cd ${BUILD_WRKSRC}; ${SETENV} ${MAKE_ENV} ${CHROOT_DO} ${PYTHON_CMD} ${PYDISTUTILS_SETUP} ${PYDISTUTILS_CONFIGURE_TARGET} ${PYDISTUTILS_CONFIGUREARGS})
+	@(cd ${BUILD_WRKSRC}; ${PORTENV} ${MAKE_ENV} ${PYTHON_CMD} ${PYDISTUTILS_SETUP} ${PYDISTUTILS_CONFIGURE_TARGET} ${PYDISTUTILS_CONFIGUREARGS})
 .endif
 
 .if !target(do-build)
 do-build:
-	@(cd ${BUILD_WRKSRC}; ${SETENV} ${MAKE_ENV} ${CHROOT_DO} ${PYTHON_CMD} ${PYDISTUTILS_SETUP} ${PYDISTUTILS_BUILD_TARGET} ${PYDISTUTILS_BUILDARGS})
+	@(cd ${BUILD_WRKSRC}; ${PORTENV} ${MAKE_ENV} ${PYTHON_CMD} ${PYDISTUTILS_SETUP} ${PYDISTUTILS_BUILD_TARGET} ${PYDISTUTILS_BUILDARGS})
 .endif
 
 .if !target(do-install)
 do-install:
-	@(cd ${INSTALL_WRKSRC}; ${SETENV} ${MAKE_ENV} ${CHROOT_DO} ${PYTHON_CMD} ${PYDISTUTILS_SETUP} ${PYDISTUTILS_INSTALL_TARGET} ${PYDISTUTILS_INSTALLARGS})
+	@(cd ${INSTALL_WRKSRC}; ${PORTENV} ${MAKE_ENV} ${PYTHON_CMD} ${PYDISTUTILS_SETUP} ${PYDISTUTILS_INSTALL_TARGET} ${PYDISTUTILS_INSTALLARGS})
 .endif
 .endif # defined(_PYTHON_FEATURE_DISTUTILS)
 .endif # defined(_POSTMKINCLUDED) && !defined(_INCLUDE_USES_PYTHON_POST_MK)

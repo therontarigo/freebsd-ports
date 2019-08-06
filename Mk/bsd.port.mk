@@ -1024,10 +1024,12 @@ FreeBSD_MAINTAINER=	portmgr@FreeBSD.org
 
 .ifdef PORTS_SEPARATED_BUILD
 # Always require a WRKDIRPREFIX (user may change it)
-WRKDIRPREFIX?=/tmp/ports
+PORTBLDBASE?=/tmp/ports
+WRKDIRPREFIX?=${PORTBLDBASE}/wrk
 
 # The location in which dependencies will be placed.
-PORTBLDROOT?=${WRKDIRPREFIX}/depsroot
+PORTBLDROOT?=${PORTBLDBASE}/depsroot
+
 # Allow pkg to work when using PORTS_SEPARATED_BUILD as non-root.
 INSTALL_AS_USER=1
 .MAKEOVERRIDES+=PORTBLDROOT
@@ -1037,9 +1039,9 @@ INSTALL_AS_USER=1
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:${PORTBLDROOT}/.localbin
 PATH_CHROOTED=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin
 .export PATH
-PORT_DBDIR?=${WRKDIRPREFIX}/portdb
-DISTDIR?=${WRKDIRPREFIX}/distfiles
-PACKAGES?=${WRKDIRPREFIX}/packages
+PORT_DBDIR?=${PORTBLDBASE}/portdb
+DISTDIR?=${PORTBLDBASE}/distfiles
+PACKAGES?=${PORTBLDBASE}/packages
 
 # devel/userns is assumed to be installed in PORTBLDROOT but this may be
 # overridden to test a developmental version of userns.

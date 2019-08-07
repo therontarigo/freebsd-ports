@@ -1,0 +1,3 @@
+#!/bin/sh
+# Make bmake behave like base make
+exec "${BMAKE_BIN}" -m /usr/share/mk "$@"

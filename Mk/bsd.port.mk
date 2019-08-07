@@ -1036,7 +1036,10 @@ INSTALL_AS_USER=1
 .MAKEOVERRIDES+=INSTALL_AS_USER
 .export INSTALL_AS_USER
 # Only use executables from base and from LOCALBASE
-PATH=/sbin:/bin:/usr/sbin:/usr/bin:${PORTBLDROOT}/.localbin
+# If inside PORTENV, PATH is already set correctly.
+.ifndef _in_portenv
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+.endif
 PATH_CHROOTED=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin
 .export PATH
 PORT_DBDIR?=${PORTBLDBASE}/portdb
@@ -1058,8 +1061,15 @@ PATHMAP+=/usr/bin/${bin}%${USERNS_INSTALL}/cc
 # Otherwise, have bmake (quick to build and dynamically linked) appear as if it
 # is installed as the system's make.
 # Is it okay to assume PREFIX==LOCALBASE for bmake?
-PATHMAP+=/usr/bin/make%${PORTBLDROOT}${LOCALBASE}/bin/bmake
+BMAKE_BIN=${PORTBLDROOT}${LOCALBASE}/bin/bmake
+# BMAKE_BIN is required in environment by Mk/Exec/make
+.export BMAKE_BIN
+PATHMAP+=/usr/bin/make%${PORTSDIR}/Mk/Exec/make
+PTARGMAKE=${PORTENV} ${LOCALBASE}/bin/bmake _in_portenv=1
+.else
+PTARGMAKE=/usr/bin/make
 .endif
+
 # Redirect all reads from ${LOCALBASE}, the primary location in which
 # dependency ports install their files.
 PATHMAP+=${LOCALBASE}%${PORTBLDROOT}${LOCALBASE}
@@ -1113,8 +1123,8 @@ USERNS_ORIGIN?=devel/userns
 .if ("${PORTNAME}" != "bmake") && ("${PORTNAME}" != "pkg") && \
     ("${PORTNAME}" != "userns")
 # Add implicit dependency of all other ports on bmake and userns
-BUILD_DEPENDS+=	${LOCALBASE}/bin/bmake:${BMAKE_ORIGIN}
-BUILD_DEPENDS+=	${LOCALBASE}/libexec/userns/intercept.so:${USERNS_ORIGIN}
+EXTRACT_DEPENDS+=	${LOCALBASE}/bin/bmake:${BMAKE_ORIGIN}
+EXTRACT_DEPENDS+=	${LOCALBASE}/libexec/userns/intercept.so:${USERNS_ORIGIN}
 .endif
 
 # Allow creation of the location in which dependencies will be placed.
@@ -1713,6 +1723,25 @@ DEV_ERROR+=	"${PKGNAME}: Makefile error: you cannot include bsd.port[.post].mk t
 .endif
 
 _POSTMKINCLUDED=	yes
+
+# By testing for defined targets NOW, it is possible to determine whether the
+# target needs to be run in a sub-make (port-defined target) or can be run
+# directly (the target comes from a USES or from bsd.port.mk in which case it
+# is separated-build compliant).
+
+.if !defined(_portenv_target_checked)
+_portenv_target_checked=1
+.MAKEOVERRIDES+=_portenv_target_checked
+# always use portenv for create-binary-alias
+_portenv_target.create-binary-alias:=1
+.for s in fetch extract patch configure build test install
+.for t in pre-${s} do-${s} post-${s} ${_OPTIONS_${s}:C/.*://}
+.if target(${t})
+_portenv_target.${t}:=1
+.endif
+.endfor
+.endfor
+.endif
 
 .if defined(BUNDLE_LIBS)
 PKG_NOTES+=	no_provide_shlib
@@ -3761,6 +3790,16 @@ package-message:
 
 # Empty pre-* and post-* targets
 
+# post-*-script appears to be misused by a small handful of ports (mostly in
+# games category) so those will be fixed as needed.
+.for stage in pre post
+.for name in pkg check-sanity fetch extract patch configure build stage install package
+.if target(${stage}-${name}-script)
+DEV_WARNING+=	"Port defines ${stage}-${name}-script as a Makefile target.  Use ${stage}-${name} instead."
+.endif
+.endfor
+.endfor
+
 .if exists(${SCRIPTDIR})
 .for stage in pre post
 .for name in pkg check-sanity fetch extract patch configure build stage install package
@@ -5268,7 +5307,11 @@ install-desktop-entries:
 .if !target(create-binary-alias)
 create-binary-alias: ${BINARY_LINKDIR}
 .for target src in ${BINARY_ALIAS:C/=/ /}
-	@${RLN} `which ${src}` ${BINARY_LINKDIR}/${target}
+#	@${RLN} `which ${src}` ${BINARY_LINKDIR}/${target}
+# Hack: work around userns present inability to translate symbolic link targets
+	@${RM} ${BINARY_LINKDIR}/${target}
+	@printf '#!/bin/sh\nexec %s "$$@"\n' `which ${src}` > ${BINARY_LINKDIR}/${target}
+	@${CHMOD} +x ${BINARY_LINKDIR}/${target}
 .endfor
 .endif
 .endif
@@ -5437,10 +5480,21 @@ _${_t}_SEQ:=	${_tmp_seq}
 .  endif
 .  for s in ${_${_t}_SEQ:O:C/^[0-9]+://}
 .    if target(${s})
-.      if ! ${NOTPHONY:M${s}}
-_PHONY_TARGETS+= ${s}
+.      if defined(_portenv_target.${s})
+_tmp_s:=	portenv-${s}
+portenv-${s}:
+	@${PTARGMAKE} -C ${.CURDIR} ${s}
+.      else
+_tmp_s:=	${s}
+portenv-${s}: ${s}
 .      endif
-_${_t}_REAL_SEQ+=	${s}
+# evaluate for _s:=${_tmp_s}
+.for _s in ${_tmp_s}
+.      if ! ${NOTPHONY:M${_s}}
+_PHONY_TARGETS+= ${_s}
+.      endif
+_${_t}_REAL_SEQ+=	${_s}
+.endfor
 .    endif
 .  endfor
 .  for s in ${_${_t}_SUSEQ:O:C/^[0-9]+://}
@@ -5453,6 +5507,14 @@ _${_t}_REAL_SUSEQ+=	${s}
 .  endfor
 .ORDER: ${_${_t}_DEP} ${_${_t}_REAL_SEQ}
 .endfor
+
+.ifdef PORTS_SEPARATED_BUILD
+.for t in ${.TARGETS}
+.if defined(_portenv_target.${t})
+.error Target ${t} may not be run from Make command line.  Use portenv-${t} instead.
+.endif
+.endfor
+.endif
 
 # Define all of the main targets which depend on a sequence of other targets.
 # See above *_SEQ and *_DEP. The _DEP will run before this defined target is

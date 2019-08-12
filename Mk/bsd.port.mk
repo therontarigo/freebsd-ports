@@ -4166,7 +4166,6 @@ ${deptype:tl}-depends: ${PORTBLDROOT}
 		dp_PORTBLDROOT="${PORTBLDROOT}" \
 		dp_PKG_ARGS_ROOT="${PKG_ARGS_ROOT}" \
 		dp_PORTSDIR="${PORTSDIR}" \
-		dp_PKG_ADD_ENV="${PKG_ADD_ENV}" \
 		${SH} ${SCRIPTSDIR}/do-depends.sh
 		${PORTBLD_DO_LDCONFIG}
 .endif

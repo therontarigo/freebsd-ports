@@ -118,6 +118,12 @@ ECHO_CMD?=		echo	# Shell builtin
 # Used to print all the '===>' style prompts - override this to turn them off.
 ECHO_MSG?=		${ECHO_CMD}
 
+# Used to set the environment for all port-defined commands and targets.
+# Any program executed from ${LOCALBASE} MUST use this.
+# Defaults to ${SETENV} (no change to environment)
+# unless PORTS_SEPARATED_BUILD is in use.
+PORTENV?=		${SETENV}
+
 .elif !defined(_PKGTOOLSDEFINED)
 _PKGTOOLSDEFINED=	yes
 PKG_BIN?=		${PORTBLDROOT}${LOCALBASE}/sbin/pkg-static

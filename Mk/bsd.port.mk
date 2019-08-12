@@ -1104,11 +1104,6 @@ INTERCEPT_ENV+=LD_ELF_HINTS_PATH=${PORTBLDROOT}/var/run/ld-elf.so.hints
 # the command arguments.
 INTERCEPT_CC_MAP=${LOCALBASE}%${PORTBLDROOT}${LOCALBASE}
 .export INTERCEPT_CC_MAP
-
-# these needed by usernswrapper
-.export INTERCEPT_ENV
-.export PATH_CHROOTED
-
 .if ("${PORTNAME}" != "bmake") && ("${PORTNAME}" != "pkg") && \
     ("${PORTNAME}" != "userns")
 # Check that the port being built is not one of these named, which must be
@@ -1846,7 +1841,6 @@ _WRKDIR=	work-${FLAVOR}
 
 WRKDIR?=		${WRKDIRPREFIX}${.CURDIR}/${_WRKDIR}
 BINARY_LINKDIR=	${WRKDIR}/.bin
-# <theron> This is wrong, need to find something better than PATH_CHROOTED
 PATH:=			${BINARY_LINKDIR}:${PATH}
 .if !${MAKE_ENV:MPATH=*} && !${CONFIGURE_ENV:MPATH=*}
 MAKE_ENV+=			PATH=${PATH_CHROOTED}
@@ -4165,7 +4159,6 @@ ${deptype:tl}-depends: ${PORTBLDROOT}
 		dp_MAKEFLAGS='${.MAKEFLAGS}' \
 		dp_PORTBLDROOT="${PORTBLDROOT}" \
 		dp_PKG_ARGS_ROOT="${PKG_ARGS_ROOT}" \
-		dp_PORTSDIR="${PORTSDIR}" \
 		${SH} ${SCRIPTSDIR}/do-depends.sh
 		${PORTBLD_DO_LDCONFIG}
 .endif

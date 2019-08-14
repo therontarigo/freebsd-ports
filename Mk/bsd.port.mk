@@ -1067,7 +1067,7 @@ BMAKE_BIN=${PORTBLDROOT}${LOCALBASE}/bin/bmake
 PATHMAP+=/usr/bin/make%${PORTSDIR}/Mk/Exec/make
 PTARGMAKE=${PORTENV} ${LOCALBASE}/bin/bmake _in_portenv=1
 .else
-PTARGMAKE=/usr/bin/make
+PTARGMAKE=/usr/bin/make _in_portenv=1
 .endif
 
 # Redirect all reads from ${LOCALBASE}, the primary location in which
@@ -1724,9 +1724,8 @@ _POSTMKINCLUDED=	yes
 # directly (the target comes from a USES or from bsd.port.mk in which case it
 # is separated-build compliant).
 
-.if !defined(_portenv_target_checked)
+.if !defined(_portenv_target_checked) && !defined(_in_portenv)
 _portenv_target_checked=1
-.MAKEOVERRIDES+=_portenv_target_checked
 # always use portenv for create-binary-alias
 _portenv_target.create-binary-alias:=1
 .for s in fetch extract patch configure build test install

@@ -1065,9 +1065,9 @@ BMAKE_BIN=${PORTBLDROOT}${LOCALBASE}/bin/bmake
 # BMAKE_BIN is required in environment by Mk/Exec/make
 .export BMAKE_BIN
 PATHMAP+=/usr/bin/make%${PORTSDIR}/Mk/Exec/make
-PTARGMAKE=${PORTENV} ${LOCALBASE}/bin/bmake _in_portenv=1
+PORTENVMAKE=${PORTENV} ${LOCALBASE}/bin/bmake _in_portenv=1
 .else
-PTARGMAKE=/usr/bin/make _in_portenv=1
+PORTENVMAKE=/usr/bin/make _in_portenv=1
 .endif
 
 # Redirect all reads from ${LOCALBASE}, the primary location in which
@@ -5474,7 +5474,7 @@ _${_t}_SEQ:=	${_tmp_seq}
 .      if defined(_portenv_target.${s})
 _tmp_s:=	portenv-${s}
 portenv-${s}:
-	@${PTARGMAKE} -C ${.CURDIR} ${s}
+	@${PORTENVMAKE} -C ${.CURDIR} ${s}
 .      else
 _tmp_s:=	${s}
 portenv-${s}: ${s}

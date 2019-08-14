@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# service.sh: /usr/sbin/service replacement for install scripts of ports
+# installed to ${PORTBLDROOT}
+
+set -e
+
+. ${pkgenv_SCRIPTSDIR}/functions.sh
+
+validate_env pkgenv_LOCALBASE pkgenv_PORTBLDROOT pkgenv_SCRIPTSDIR
+
+set -u
+
+LOCALBASE="${pkgenv_LOCALBASE}"
+PORTBLDROOT="${pkgenv_PORTBLDROOT}"
+SCRIPTSDIR="${pkgenv_SCRIPTSDIR}"
+
+case "$1" in
+	ldconfig)
+		exec /usr/bin/env \
+			dp_LOCALBASE="${LOCALBASE}" \
+			dp_PORTBLDROOT="${PORTBLDROOT}" \
+			dp_SCRIPTSDIR="${SCRIPTSDIR}" \
+			/bin/sh ${SCRIPTSDIR}/ldconfig.sh
+	;;
+	*)
+		printf %s\\n "Error: Invalid service command for dependency:$(printf ' %s' $@ )" >&2
+		exit 1
+	;;
+esac

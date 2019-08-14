@@ -1070,6 +1070,10 @@ PORTENVMAKE=${PORTENV} ${LOCALBASE}/bin/bmake _in_portenv=1
 PORTENVMAKE=/usr/bin/make _in_portenv=1
 .endif
 
+# Catch attempts by pkg scripts to manage system services
+# (including ldconfig)
+PATHMAP+=/usr/sbin/service%${PORTSDIR}/Mk/Exec/service
+
 # Redirect all reads from ${LOCALBASE}, the primary location in which
 # dependency ports install their files.
 PATHMAP+=${LOCALBASE}%${PORTBLDROOT}${LOCALBASE}
@@ -1118,14 +1122,25 @@ USERNS_ORIGIN?=devel/userns
 .if ("${PORTNAME}" != "bmake") && ("${PORTNAME}" != "pkg") && \
     ("${PORTNAME}" != "userns")
 # Add implicit dependency of all other ports on bmake and userns
-EXTRACT_DEPENDS+=	${LOCALBASE}/bin/bmake:${BMAKE_ORIGIN}
-EXTRACT_DEPENDS+=	${LOCALBASE}/libexec/userns/intercept.so:${USERNS_ORIGIN}
+PORTENV_DEPENDS+=	${LOCALBASE}/bin/bmake:${BMAKE_ORIGIN}
+PORTENV_DEPENDS+=	${LOCALBASE}/libexec/userns/intercept.so:${USERNS_ORIGIN}
+PKG_REGISTER=	${PKG_IN_PORTENV} register
+PKG_DELETE=	${PKG_IN_PORTENV} delete -y
 .endif
 
 # Allow creation of the location in which dependencies will be placed.
 .if !target(${PORTBLDROOT})
 ${PORTBLDROOT}:
 	${MKDIR} ${.TARGET}
+.endif
+
+.if !target(${PORTBLDROOT}/var/run/ld-elf.so.hints)
+${PORTBLDROOT}/var/run/ld-elf.so.hints:
+	@${SETENV} \
+		dp_LOCALBASE="${LOCALBASE}" \
+		dp_SCRIPTSDIR="${SCRIPTSDIR}" \
+		dp_PORTBLDROOT="${PORTBLDROOT}" \
+		${SH} ${SCRIPTSDIR}/ldconfig.sh
 .endif
 
 # Always use PACKAGES
@@ -1139,15 +1154,8 @@ portbld-prepare-package: ${PACKAGES}
 
 # Require dependency install location to exist before attempting installation.
 .if !target(portbld-prepare-install)
-portbld-prepare-install: ${PORTBLDROOT}
+portbld-prepare-install: ${PORTBLDROOT} ${PORTBLDROOT}/var/run/ld-elf.so.hints
 .endif
-
-# Generate a ld-elf.so.hints to enable tools running from PORTBLDROOT to find
-# the appropriate shared objects, also in PORTBLDROOT.
-PORTBLD_DO_LDCONFIG= ( \
-	${MKDIR} "${PORTBLDROOT}/var/run" && \
-	${SETENV} LOCALBASE=${LOCALBASE} PORTBLDROOT=${PORTBLDROOT} ${SCRIPTSDIR}/ldconfig.sh \
-	)
 
 # runchrt: run command specified by setting CMD inside file redirection
 # environment
@@ -1155,6 +1163,18 @@ PORTBLD_DO_LDCONFIG= ( \
 runchrt:
 	@${CHROOT_DO} ${CMD}
 .endif
+
+# Run post-install scripts only when appropriate
+PKG_PRE_PORTENV= ${SETENV} RUN_SCRIPTS=NO HANDLE_RC_SCRIPTS=NO ${PKG_BIN} ${PKG_ARGS_ROOT}
+PKG_BIN_DYN=	${PORTBLDROOT}${LOCALBASE}/sbin/pkg
+PKG_IN_PORTENV=	${PORTENV} \
+	pkgenv_LOCALBASE=${LOCALBASE} \
+	pkgenv_PORTBLDROOT=${PORTBLDROOT} \
+	pkgenv_SCRIPTSDIR=${SCRIPTSDIR} \
+	${PKG_BIN_DYN} ${PKG_ARGS_ROOT}
+PKG_ADD=	${PKG_IN_PORTENV} add
+PKG_ADD_PKG= ${PKG_PRE_PORTENV} add
+PKG_ADD_PORTENV= ${PKG_PRE_PORTENV} add
 
 .else # !defined(PORTS_SEPARATED_BUILD)
 
@@ -1645,9 +1665,9 @@ FLAVORS:=	${FLAVOR} ${FLAVORS:N${FLAVOR}}
 _DID_FLAVORS_HELPERS=	yes
 _FLAVOR_HELPERS_OVERRIDE=	DESCR PLIST PKGNAMEPREFIX PKGNAMESUFFIX
 _FLAVOR_HELPERS_APPEND=	 	CONFLICTS CONFLICTS_BUILD CONFLICTS_INSTALL \
-							PKG_DEPENDS EXTRACT_DEPENDS PATCH_DEPENDS \
-							FETCH_DEPENDS BUILD_DEPENDS LIB_DEPENDS \
-							RUN_DEPENDS TEST_DEPENDS
+							PKG_DEPENDS PORTENV_DEPENDS EXTRACT_DEPENDS \
+							PATCH_DEPENDS FETCH_DEPENDS BUILD_DEPENDS \
+							LIB_DEPENDS RUN_DEPENDS TEST_DEPENDS
 # These overwrite the current value
 .for v in ${_FLAVOR_HELPERS_OVERRIDE}
 .if defined(${FLAVOR}_${v})
@@ -4132,7 +4152,7 @@ package-noinstall: package
 .if !target(depends)
 depends: pkg-depends extract-depends patch-depends lib-depends fetch-depends build-depends run-depends
 
-.for deptype in PKG EXTRACT PATCH FETCH BUILD LIB RUN TEST
+.for deptype in PKG PORTENV EXTRACT PATCH FETCH BUILD LIB RUN TEST
 ${deptype:tl}-depends: ${PORTBLDROOT}
 .if defined(${deptype}_DEPENDS) && !defined(NO_DEPENDS)
 	@${SETENV} \
@@ -4144,7 +4164,7 @@ ${deptype:tl}-depends: ${PORTBLDROOT}
 		dp_DEPENDS_ARGS="${DEPENDS_ARGS}" \
 		dp_USE_PACKAGE_DEPENDS="${USE_PACKAGE_DEPENDS}" \
 		dp_USE_PACKAGE_DEPENDS_ONLY="${USE_PACKAGE_DEPENDS_ONLY}" \
-		dp_PKG_ADD="${PKG_ADD}" \
+		dp_PKG_ADD="${PKG_ADD_${deptype}:U${PKG_ADD}}" \
 		dp_PKG_INFO="${PKG_INFO}" \
 		dp_WRKDIR="${WRKDIR}" \
 		dp_PKGNAME="${PKGNAME}" \
@@ -4159,7 +4179,6 @@ ${deptype:tl}-depends: ${PORTBLDROOT}
 		dp_PORTBLDROOT="${PORTBLDROOT}" \
 		dp_PKG_ARGS_ROOT="${PKG_ARGS_ROOT}" \
 		${SH} ${SCRIPTSDIR}/do-depends.sh
-		${PORTBLD_DO_LDCONFIG}
 .endif
 .endfor
 
@@ -4167,7 +4186,7 @@ ${deptype:tl}-depends: ${PORTBLDROOT}
 
 # Dependency lists: both build and runtime, recursive.  Print out directory names.
 
-_UNIFIED_DEPENDS=${PKG_DEPENDS} ${EXTRACT_DEPENDS} ${PATCH_DEPENDS} ${FETCH_DEPENDS} ${BUILD_DEPENDS} ${LIB_DEPENDS} ${RUN_DEPENDS} ${TEST_DEPENDS}
+_UNIFIED_DEPENDS=${PKG_DEPENDS} ${PORTENV_DEPENDS} ${EXTRACT_DEPENDS} ${PATCH_DEPENDS} ${FETCH_DEPENDS} ${BUILD_DEPENDS} ${LIB_DEPENDS} ${RUN_DEPENDS} ${TEST_DEPENDS}
 _DEPEND_SPECIALS=	${_UNIFIED_DEPENDS:M*\:*\:*:C,^[^:]*:([^:]*):.*$,\1,}
 
 .for d in ${_UNIFIED_DEPENDS:M*\:/*}
@@ -4217,7 +4236,7 @@ DEPENDS-LIST= \
 ALL-DEPENDS-LIST=			${DEPENDS-LIST} -r ${_UNIFIED_DEPENDS:Q}
 ALL-DEPENDS-FLAVORS-LIST=	${DEPENDS-LIST} -f -r ${_UNIFIED_DEPENDS:Q}
 MISSING-DEPENDS-LIST=		${DEPENDS-LIST} -m ${_UNIFIED_DEPENDS:Q}
-BUILD-DEPENDS-LIST=			${DEPENDS-LIST} "${PKG_DEPENDS} ${EXTRACT_DEPENDS} ${PATCH_DEPENDS} ${FETCH_DEPENDS} ${BUILD_DEPENDS} ${LIB_DEPENDS}"
+BUILD-DEPENDS-LIST=			${DEPENDS-LIST} "${PKG_DEPENDS} ${PORTENV_DEPENDS} ${EXTRACT_DEPENDS} ${PATCH_DEPENDS} ${FETCH_DEPENDS} ${BUILD_DEPENDS} ${LIB_DEPENDS}"
 RUN-DEPENDS-LIST=			${DEPENDS-LIST} "${LIB_DEPENDS} ${RUN_DEPENDS}"
 TEST-DEPENDS-LIST=			${DEPENDS-LIST} ${TEST_DEPENDS:Q}
 CLEAN-DEPENDS-LIST=			${DEPENDS-LIST} -wr ${_UNIFIED_DEPENDS:Q} 
@@ -4306,7 +4325,7 @@ fetch-required: fetch
 	@${ECHO_MSG} "===> NO_DEPENDS is set, not fetching any other distfiles for ${PKGNAME}"
 .else
 	@${ECHO_MSG} "===> Fetching all required distfiles for ${PKGNAME} and dependencies"
-.for deptype in PKG EXTRACT PATCH FETCH BUILD RUN
+.for deptype in PKG PORTENV EXTRACT PATCH FETCH BUILD RUN
 .if defined(${deptype}_DEPENDS)
 	@targ=fetch; deps="${${deptype}_DEPENDS}"; ${FETCH_LIST}
 .endif
@@ -4318,7 +4337,7 @@ fetch-required: fetch
 .if !target(fetch-required-list)
 fetch-required-list: fetch-list
 .if !defined(NO_DEPENDS)
-.for deptype in PKG EXTRACT PATCH FETCH BUILD RUN
+.for deptype in PKG PORTENV EXTRACT PATCH FETCH BUILD RUN
 .if defined(${deptype}_DEPENDS)
 	@targ=fetch-list; deps="${${deptype}_DEPENDS}"; ${FETCH_LIST}
 .endif
@@ -4337,7 +4356,7 @@ checksum-recursive:
 # Dependency lists: build and runtime.  Print out directory names.
 
 build-depends-list:
-.if defined(PKG_DEPENDS) || defined(EXTRACT_DEPENDS) || defined(PATCH_DEPENDS) || defined(FETCH_DEPENDS) || defined(BUILD_DEPENDS) || defined(LIB_DEPENDS)
+.if defined(PKG_DEPENDS) || defined(PORTENV_DEPENDS) || defined(EXTRACT_DEPENDS) || defined(PATCH_DEPENDS) || defined(FETCH_DEPENDS) || defined(BUILD_DEPENDS) || defined(LIB_DEPENDS)
 	@${BUILD-DEPENDS-LIST}
 .endif
 
@@ -4599,7 +4618,7 @@ _PRETTY_PRINT_DEPENDS_LIST=\
 
 .if !target(pretty-print-build-depends-list)
 pretty-print-build-depends-list:
-.if defined(PKG_DEPENDS) || defined(EXTRACT_DEPENDS) || defined(PATCH_DEPENDS) || \
+.if defined(PKG_DEPENDS) || defined(PORTENV_DEPENDS) || defined(EXTRACT_DEPENDS) || defined(PATCH_DEPENDS) || \
 	defined(FETCH_DEPENDS) || defined(BUILD_DEPENDS) || defined(LIB_DEPENDS)
 	@${_PRETTY_PRINT_DEPENDS_LIST}
 .endif
@@ -4859,7 +4878,6 @@ fake-pkg:
 .else
 	@${SETENV} ${PKG_ENV} FORCE_POST="${_FORCE_POST_PATTERNS}" ${PKG_REGISTER} ${STAGE_ARGS} -m ${METADIR} -f ${TMPPLIST}
 .endif
-	@${PORTBLD_DO_LDCONFIG}
 	@${RM} -r ${METADIR}
 .endif
 .endif
@@ -5387,7 +5405,7 @@ _SANITY_SEQ=	050:post-chroot 100:pre-everything \
 				700:buildanyway-message 750:options-message ${_USES_sanity}
 
 _PKG_DEP=		check-sanity
-_PKG_SEQ=		500:pkg-depends
+_PKG_SEQ=		500:pkg-depends 900:portenv-depends
 _FETCH_DEP=		pkg
 _FETCH_SEQ=		150:fetch-depends 300:pre-fetch 450:pre-fetch-script \
 				500:do-fetch 550:fetch-specials 700:post-fetch \

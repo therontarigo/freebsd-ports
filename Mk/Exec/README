@@ -1,0 +1,6 @@
+
+Mk/Exec: Shell programs required by the ports framework
+
+In contrast to scripts in Mk/Scripts, which are interpreted by ${SH} from
+bsd.port.mk, programs in Mk/Exec must be directly executable since they are
+invoked from other programs during port building (See PATHMAP variable).

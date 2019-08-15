@@ -46,7 +46,7 @@ PORTDOCS=	*
 PORT_OPTIONS:=	${PORT_OPTIONS:NEXAMPLES}
 
 do-build:
-	(cd ${WRKSRC}/docs && ${CHROOT_DO} ${MAKE} SPHINXBUILD=sphinx-build-${PYTHON_VER} html)
+	(cd ${WRKSRC}/docs && ${MAKE} SPHINXBUILD=sphinx-build-${PYTHON_VER} html)
 
 do-install:
 	@${MKDIR} ${STAGEDIR}${DOCSDIR}
@@ -58,10 +58,10 @@ do-install:
 PORTEXAMPLES=	*
 post-build:
 .	if ${PYTHON_REL} >= 3000
-	${CHROOT_DO} ${PY2TO3_CMD} ${PY2TO3_ARGS} ${WRKSRC}/examples
+	${PY2TO3_CMD} ${PY2TO3_ARGS} ${WRKSRC}/examples
 .	endif
-	${CHROOT_DO} ${PYTHON_CMD} -m compileall ${WRKSRC}/examples ; \
-	${CHROOT_DO} ${PYTHON_CMD} -O -m compileall ${WRKSRC}/examples
+	${PYTHON_CMD} -m compileall ${WRKSRC}/examples ; \
+	${PYTHON_CMD} -O -m compileall ${WRKSRC}/examples
 
 post-install:
 	@${MKDIR} ${STAGEDIR}${EXAMPLESDIR}
@@ -70,7 +70,7 @@ post-install:
 
 check regression-test test: build
 .if empty(PKGNAMESUFFIX)
-	@cd ${WRKSRC} && ${CHROOT_DO} ${PYTHON_CMD} ${PYSETUP} test
+	@cd ${WRKSRC} && ${PYTHON_CMD} ${PYSETUP} test
 .else
 	@${DO_NADA}
 .endif

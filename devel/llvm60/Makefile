@@ -321,10 +321,10 @@ post-patch-CLANG-on:
 post-build-COMPILER_RT-on:
 	${MKDIR} ${WRKDIR}/compiler-rt-build
 	cd ${WRKDIR}/compiler-rt-build && \
-	${CHROOT_DO} ${SETENV} ${CONFIGURE_ENV} ${CMAKE_BIN} ${CMAKE_ARGS} \
+	${SETENV} ${CONFIGURE_ENV} ${CMAKE_BIN} ${CMAKE_ARGS} \
 	    -DLLVM_CONFIG_PATH=${CONFIGURE_WRKSRC}/bin/llvm-config \
 	    ${WRKSRC_compiler_rt} && \
-	    ${CHROOT_DO} ${MAKE_ENV} ${MAKE_CMD}
+	    ${MAKE_ENV} ${MAKE_CMD}
 
 post-install:
 	${RM} -r ${STAGEDIR}${LLVM_PREFIX}/include/llvm/MC/MCAnalysis
@@ -371,7 +371,7 @@ post-install-CLANG-on:
 
 post-install-COMPILER_RT-on:
 	cd ${WRKDIR}/compiler-rt-build && \
-	    ${CHROOT_DO} ${SETENV} ${MAKE_ENV} ${MAKE_CMD} ${INSTALL_TARGET}
+	    ${MAKE_ENV} ${MAKE_CMD} ${INSTALL_TARGET}
 .if ${ARCH} == "amd64"
 	${RM} ${STAGEDIR}${LLVM_PREFIX}/lib/freebsd/libclang_rt*i386*
 .endif

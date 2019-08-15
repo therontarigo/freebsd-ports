@@ -32,7 +32,7 @@ post-patch:
 	@${REINPLACE_CMD} "s/'-g', //" ${WRKSRC}/configure.py
 
 do-build:
-	@(cd ${WRKSRC} && ${CHROOT_DO} \
+	@(cd ${WRKSRC} && \
 		CXX="${CXX}" CFLAGS="${CXXFLAGS}" ${PYTHON_CMD} configure.py --bootstrap)
 
 do-install:

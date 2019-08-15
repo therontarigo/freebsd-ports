@@ -288,7 +288,7 @@ phpize-message:
 	@${ECHO_MSG} "===>  PHPizing for ${PKGNAME}"
 
 do-phpize:
-	@(cd ${WRKSRC}; ${SETENV} ${SCRIPTS_ENV} ${PHPBASE}/bin/phpize)
+	@(cd ${WRKSRC}; ${PORTENV} ${SCRIPTS_ENV} ${PHPBASE}/bin/phpize)
 .  endif
 
 _USES_POST+=php

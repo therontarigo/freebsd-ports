@@ -38,7 +38,6 @@
     SUBDIR += aws
     SUBDIR += aws-demos
     SUBDIR += awstats
-    SUBDIR += axis
     SUBDIR += axis2
     SUBDIR += bacula-web
     SUBDIR += baikal
@@ -89,6 +88,7 @@
     SUBDIR += closure-compiler
     SUBDIR += cntlm
     SUBDIR += codeigniter
+    SUBDIR += colly
     SUBDIR += coppermine
     SUBDIR += cplanet
     SUBDIR += cppcms
@@ -107,6 +107,7 @@
     SUBDIR += ddgr
     SUBDIR += decss
     SUBDIR += demoroniser
+    SUBDIR += devd
     SUBDIR += dfileserver
     SUBDIR += dhttpd
     SUBDIR += dillo2
@@ -159,6 +160,7 @@
     SUBDIR += ffproxy
     SUBDIR += ffsend
     SUBDIR += fgallery
+    SUBDIR += filtron
     SUBDIR += firefox
     SUBDIR += firefox-esr
     SUBDIR += flashplayer
@@ -215,6 +217,7 @@
     SUBDIR += grafana3
     SUBDIR += grafana4
     SUBDIR += grafana5
+    SUBDIR += grafana6
     SUBDIR += grails
     SUBDIR += gregarius
     SUBDIR += groupoffice
@@ -431,6 +434,7 @@
     SUBDIR += moodle35
     SUBDIR += moodle36
     SUBDIR += moodle37
+    SUBDIR += morty
     SUBDIR += mozplugger
     SUBDIR += multisort
     SUBDIR += multiwatch
@@ -738,6 +742,7 @@
     SUBDIR += p5-Catalyst-View-XML-Feed
     SUBDIR += p5-Catalyst-View-XML-Simple
     SUBDIR += p5-Catalyst-View-XSLT
+    SUBDIR += p5-Catalyst-View-vCard
     SUBDIR += p5-CatalystX-AppBuilder
     SUBDIR += p5-CatalystX-Component-Traits
     SUBDIR += p5-CatalystX-InjectComponent
@@ -1159,6 +1164,7 @@
     SUBDIR += p5-Template-Plugin-Clickable-Email
     SUBDIR += p5-Template-Plugin-Comma
     SUBDIR += p5-Template-Plugin-FillInForm
+    SUBDIR += p5-Template-Plugin-Gettext
     SUBDIR += p5-Template-Plugin-JSON
     SUBDIR += p5-Template-Plugin-JavaScript
     SUBDIR += p5-Template-Plugin-MP3
@@ -1317,7 +1323,6 @@
     SUBDIR += p5-pQuery
     SUBDIR += p5-webservice-validator-css-w3c
     SUBDIR += p5-webservice-validator-html-w3c
-    SUBDIR += palemoon
     SUBDIR += paros
     SUBDIR += payara
     SUBDIR += pear-HTML_AJAX
@@ -1402,7 +1407,6 @@
     SUBDIR += phproxy
     SUBDIR += phpsysinfo
     SUBDIR += phpvirtualbox
-    SUBDIR += pivotx
     SUBDIR += piwigo
     SUBDIR += planet
     SUBDIR += plasma5-plasma-browser-integration
@@ -1484,11 +1488,13 @@
     SUBDIR += py-dj21-djangorestframework
     SUBDIR += py-dj21-drf-yasg
     SUBDIR += py-dj22-django-auth-ldap
+    SUBDIR += py-dj22-django-cacheops
     SUBDIR += py-dj22-django-cors-headers
     SUBDIR += py-dj22-django-debug-toolbar
     SUBDIR += py-dj22-django-filter
     SUBDIR += py-dj22-django-js-asset
     SUBDIR += py-dj22-django-mptt
+    SUBDIR += py-dj22-django-prometheus
     SUBDIR += py-dj22-django-tables2
     SUBDIR += py-dj22-django-taggit
     SUBDIR += py-dj22-django-taggit-serializer
@@ -1594,7 +1600,6 @@
     SUBDIR += py-django-webpack-loader
     SUBDIR += py-django-widget-tweaks
     SUBDIR += py-django111
-    SUBDIR += py-django20
     SUBDIR += py-django21
     SUBDIR += py-django22
     SUBDIR += py-django_compressor
@@ -2010,7 +2015,7 @@
     SUBDIR += rubygem-hamlit-rails-rails5
     SUBDIR += rubygem-hamlit-rails-rails50
     SUBDIR += rubygem-hashicorp-checkpoint
-    SUBDIR += rubygem-heroku
+    SUBDIR += rubygem-heroics
     SUBDIR += rubygem-heroku-api
     SUBDIR += rubygem-heroku-nav
     SUBDIR += rubygem-hpricot
@@ -2059,7 +2064,6 @@
     SUBDIR += rubygem-link_header
     SUBDIR += rubygem-lograge
     SUBDIR += rubygem-lograge-rails5
-    SUBDIR += rubygem-lograge-rails50
     SUBDIR += rubygem-maruku
     SUBDIR += rubygem-mechanize
     SUBDIR += rubygem-merb-assets
@@ -2082,6 +2086,7 @@
     SUBDIR += rubygem-ostatus2
     SUBDIR += rubygem-pagerduty
     SUBDIR += rubygem-passenger
+    SUBDIR += rubygem-platform-api
     SUBDIR += rubygem-puma
     SUBDIR += rubygem-puma_worker_killer
     SUBDIR += rubygem-pusher-client
@@ -2132,7 +2137,6 @@
     SUBDIR += rubygem-redmine_acts_as_taggable_on
     SUBDIR += rubygem-responders
     SUBDIR += rubygem-responders-rails5
-    SUBDIR += rubygem-responders-rails50
     SUBDIR += rubygem-rest-client
     SUBDIR += rubygem-rfacebook
     SUBDIR += rubygem-rfeedfinder
@@ -2198,7 +2202,6 @@
     SUBDIR += scloader
     SUBDIR += script4rss
     SUBDIR += seahub
-    SUBDIR += seamonkey
     SUBDIR += searx
     SUBDIR += selenium
     SUBDIR += serendipity
@@ -2442,6 +2445,8 @@
     SUBDIR += yabb
     SUBDIR += yanopaste
     SUBDIR += yarn
+    SUBDIR += yarn-node10
+    SUBDIR += yarn-node8
     SUBDIR += yaws
     SUBDIR += you-get
     SUBDIR += yourls

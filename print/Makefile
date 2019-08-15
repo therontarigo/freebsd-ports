@@ -115,6 +115,7 @@
     SUBDIR += lilypond-devel
     SUBDIR += linux-c6-cups-libs
     SUBDIR += linux-c7-cups-libs
+    SUBDIR += linux-c7-freetype
     SUBDIR += linux-c7-harfbuzz
     SUBDIR += lout
     SUBDIR += lprps
@@ -181,6 +182,7 @@
     SUBDIR += pstotext
     SUBDIR += psutils
     SUBDIR += py-fonttools
+    SUBDIR += py-fonttools-lxml-ufo
     SUBDIR += py-fpdf
     SUBDIR += py-pdf
     SUBDIR += py-pdf2

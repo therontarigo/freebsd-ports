@@ -89,7 +89,6 @@
     SUBDIR += cfdg
     SUBDIR += charls
     SUBDIR += cimg
-    SUBDIR += cinepaint
     SUBDIR += cloudcompare
     SUBDIR += clutter
     SUBDIR += clutter-gtk3
@@ -180,6 +179,7 @@
     SUBDIR += figurine
     SUBDIR += flam3
     SUBDIR += flasm
+    SUBDIR += flif
     SUBDIR += flphoto
     SUBDIR += fly
     SUBDIR += fortytwo
@@ -257,6 +257,7 @@
     SUBDIR += gimp-wavelet-sharpen-plugin
     SUBDIR += giram
     SUBDIR += gkrellkam2
+    SUBDIR += glad
     SUBDIR += gle
     SUBDIR += glee
     SUBDIR += glew
@@ -498,6 +499,7 @@
     SUBDIR += libwmf
     SUBDIR += libwmf-nox11
     SUBDIR += libwpg03
+    SUBDIR += libxatracker
     SUBDIR += libyuv
     SUBDIR += libzmf
     SUBDIR += lightzone
@@ -520,10 +522,12 @@
     SUBDIR += linux-c7-jasper
     SUBDIR += linux-c7-jbigkit
     SUBDIR += linux-c7-jpeg
+    SUBDIR += linux-c7-libglvnd
     SUBDIR += linux-c7-png
     SUBDIR += linux-c7-sdl_image
     SUBDIR += linux-c7-sdl_ttf
     SUBDIR += linux-c7-tiff
+    SUBDIR += linux-c7-wayland
     SUBDIR += lua-gd
     SUBDIR += luminance-qt5
     SUBDIR += luxrender
@@ -552,6 +556,7 @@
     SUBDIR += minder
     SUBDIR += ming
     SUBDIR += mirage
+    SUBDIR += mirtk
     SUBDIR += mmrecover
     SUBDIR += movit
     SUBDIR += mozjpeg
@@ -731,6 +736,7 @@
     SUBDIR += pecl-imagick
     SUBDIR += pecl-imagick-im7
     SUBDIR += pecl-qrencode
+    SUBDIR += pecl-vips
     SUBDIR += pecomato
     SUBDIR += pencil2d
     SUBDIR += peps
@@ -741,6 +747,7 @@
     SUBDIR += pho
     SUBDIR += photivo
     SUBDIR += photoflare
+    SUBDIR += photoflow
     SUBDIR += photopc
     SUBDIR += photoqt
     SUBDIR += phototonic
@@ -794,6 +801,7 @@
     SUBDIR += price
     SUBDIR += processing
     SUBDIR += proj
+    SUBDIR += proj5
     SUBDIR += pstoedit
     SUBDIR += pstoepsi
     SUBDIR += ptex
@@ -808,6 +816,7 @@
     SUBDIR += py-cairocffi
     SUBDIR += py-cartopy
     SUBDIR += py-chart
+    SUBDIR += py-descartes
     SUBDIR += py-django-easy-thumbnails
     SUBDIR += py-djvulibre
     SUBDIR += py-editobj
@@ -833,6 +842,7 @@
     SUBDIR += py-imageio-ffmpeg
     SUBDIR += py-imageio24
     SUBDIR += py-imagesize
+    SUBDIR += py-img2pdf
     SUBDIR += py-imgurpython
     SUBDIR += py-leather
     SUBDIR += py-mapclassify
@@ -866,6 +876,7 @@
     SUBDIR += py-pyocr
     SUBDIR += py-pypillowfight
     SUBDIR += py-pyproj
+    SUBDIR += py-pyqrcode
     SUBDIR += py-pyqtgraph
     SUBDIR += py-python-poppler-qt5
     SUBDIR += py-qt5-svg

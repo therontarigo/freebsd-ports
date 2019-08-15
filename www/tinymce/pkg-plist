@@ -1,6 +1,5 @@
 @owner www
 @group www
-%%WWWDIR%%/LICENSE.TXT
 %%WWWDIR%%/changelog.txt
 %%WWWDIR%%/js/tinymce/jquery.tinymce.min.js
 %%WWWDIR%%/js/tinymce/langs/readme.md
@@ -63,6 +62,7 @@
 %%WWWDIR%%/js/tinymce/skins/ui/oxide-dark/content.inline.min.css
 %%WWWDIR%%/js/tinymce/skins/ui/oxide-dark/content.min.css
 %%WWWDIR%%/js/tinymce/skins/ui/oxide-dark/content.mobile.min.css
+%%WWWDIR%%/js/tinymce/skins/ui/oxide-dark/fonts/tinymce-mobile.woff
 %%WWWDIR%%/js/tinymce/skins/ui/oxide-dark/skin.min.css
 %%WWWDIR%%/js/tinymce/skins/ui/oxide-dark/skin.mobile.min.css
 %%WWWDIR%%/js/tinymce/themes/mobile/theme.min.js

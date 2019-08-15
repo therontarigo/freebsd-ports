@@ -148,22 +148,12 @@
     SUBDIR += cfengine-masterfiles311
     SUBDIR += cfengine-masterfiles312
     SUBDIR += cfengine-masterfiles313
-    SUBDIR += cfengine-masterfiles36
-    SUBDIR += cfengine-masterfiles37
-    SUBDIR += cfengine-masterfiles38
-    SUBDIR += cfengine-masterfiles39
+    SUBDIR += cfengine-masterfiles314
     SUBDIR += cfengine310
     SUBDIR += cfengine311
     SUBDIR += cfengine312
     SUBDIR += cfengine313
-    SUBDIR += cfengine32
-    SUBDIR += cfengine33
-    SUBDIR += cfengine34
-    SUBDIR += cfengine35
-    SUBDIR += cfengine36
-    SUBDIR += cfengine37
-    SUBDIR += cfengine38
-    SUBDIR += cfengine39
+    SUBDIR += cfengine314
     SUBDIR += chgrep
     SUBDIR += chyves
     SUBDIR += cinnamon-control-center
@@ -224,6 +214,7 @@
     SUBDIR += daemonize
     SUBDIR += daemontools
     SUBDIR += daemontools-encore
+    SUBDIR += daggy
     SUBDIR += dar
     SUBDIR += dateutils
     SUBDIR += dc3dd
@@ -294,6 +285,7 @@
     SUBDIR += dwatch-pwsnoop
     SUBDIR += e2fsprogs
     SUBDIR += ec2-scripts
+    SUBDIR += eclat
     SUBDIR += edid-decode
     SUBDIR += eject
     SUBDIR += eksctl
@@ -531,6 +523,7 @@
     SUBDIR += javaservicewrapper
     SUBDIR += jdiskreport
     SUBDIR += jdupes
+    SUBDIR += jest
     SUBDIR += jkill
     SUBDIR += jobd
     SUBDIR += jps
@@ -759,6 +752,8 @@
     SUBDIR += openhpi
     SUBDIR += openipmi
     SUBDIR += openupsd
+    SUBDIR += openzfs
+    SUBDIR += openzfs-kmod
     SUBDIR += ori
     SUBDIR += osinfo-db-tools
     SUBDIR += osquery
@@ -1310,6 +1305,7 @@
     SUBDIR += syslog-ng319
     SUBDIR += syslog-ng320
     SUBDIR += syslog-ng321
+    SUBDIR += syslog-ng322
     SUBDIR += syslog-ng39
     SUBDIR += syslogger
     SUBDIR += sysrc
@@ -1501,7 +1497,6 @@
     SUBDIR += xe-guest-utilities
     SUBDIR += xen-guest-tools
     SUBDIR += xen-tools
-    SUBDIR += xen-tools47
     SUBDIR += xfburn
     SUBDIR += xfce4-battery-plugin
     SUBDIR += xfce4-bsdcpufreq-plugin
@@ -1548,8 +1543,6 @@
     SUBDIR += zisofs-tools
     SUBDIR += znapzend
     SUBDIR += zogftw
-    SUBDIR += zol
-    SUBDIR += zol-kmod
     SUBDIR += zrep
     SUBDIR += zrepl
     SUBDIR += zsd

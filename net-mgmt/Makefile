@@ -32,7 +32,6 @@
     SUBDIR += cacti88-spine
     SUBDIR += carbon-relay-ng
     SUBDIR += carbonzipper
-    SUBDIR += ccnet-client
     SUBDIR += ccnet-server
     SUBDIR += cdpd
     SUBDIR += cdpr
@@ -43,6 +42,7 @@
     SUBDIR += check_mk_agent
     SUBDIR += check_multi
     SUBDIR += check_mysql_health
+    SUBDIR += check_nwc_health
     SUBDIR += check_ssl_cert
     SUBDIR += chillispot
     SUBDIR += choparp

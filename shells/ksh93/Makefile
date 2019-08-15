@@ -2,9 +2,11 @@
 
 PORTNAME=	ksh93
 DISTVERSION=2020.0.0-alpha1
+PORTEPOCH=	1
+PORTREVISION=	3
 CATEGORIES=	shells
 
-MAINTAINER=	saper@saper.info
+MAINTAINER=	cy@freebsd.org
 COMMENT=	AT&T KornShell 93
 
 LICENSE=	EPL
@@ -17,11 +19,9 @@ GH_PROJECT=	ast
 GH_TAGNAME=	${HASH}
 
 KSH_CONFLICTS=		pdksh-*
-KSH93_CONFLICTS=	ksh93-devel
+KSH93_CONFLICTS=	ksh93-devel-* ast-ksh-*
 
-LDFLAGS+=	-lm
 MESON_BUILD_DIR=	build
-MAKE_ENV=	CCFLAGS="${CFLAGS}"
 
 OPTIONS_DEFAULT=	KSH93
 OPTIONS_SINGLE=		BIN_KSH
@@ -30,7 +30,6 @@ KSH_DESC=		Install to ${PREFIX}/bin/ksh
 KSH93_DESC=		Install to ${PREFIX}/bin/ksh93
 
 KSH93_EXTRA_PATCHES=	${FILESDIR}/extra-patch-install-as-ksh93
-KSH93_DESC=	Install to ${PREFIX}/bin/ksh93
 
 KSH_PLIST_SUB=		93=""
 KSH93_PLIST_SUB=	93="93"

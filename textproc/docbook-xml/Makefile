@@ -43,8 +43,8 @@ pre-install:
 	@${MKDIR} ${STAGEDIR}${PREFIX}/${DBKDIR}
 	${ECHO_CMD} "CATALOG \"${LOCALBASE}/share/xml/xmlcharent/catalog\"" \
 	    > ${STAGEDIR}${DBCAT_SGML}
-	${CHROOT_DO} xmlcatmgr -c ${STAGEDIR}${DBCAT_XML} create
-	${CHROOT_DO} xmlcatmgr -c ${STAGEDIR}${DBCAT_XML} \
+	xmlcatmgr -c ${STAGEDIR}${DBCAT_XML} create
+	xmlcatmgr -c ${STAGEDIR}${DBCAT_XML} \
 	    add nextCatalog "${LOCALBASE}/share/xml/xmlcharent/catalog.xml"
 
 .for D in ${DBFILES:C,:.*,,}
@@ -52,7 +52,7 @@ do-install-${D:S/./_/g}:
 	@${MKDIR} ${STAGEDIR}${PREFIX}/${DBKDIR}/$D
 	cd ${WRKDIR}/${DBFILES:M${D}\:*:C,.*:,,} && \
 	    ${COPYTREE_SHARE} . ${STAGEDIR}${PREFIX}/${DBKDIR}/$D
-	${CHROOT_DO} xmlcatmgr -c ${STAGEDIR}${DBCAT_XML} \
+	xmlcatmgr -c ${STAGEDIR}${DBCAT_XML} \
 	    add nextCatalog "${PREFIX}/${DBKDIR}/$D/catalog.xml"
 	test "$D" = 5.0 || test "$D" = 4.1.2 || \
 	    ${ECHO_CMD} "CATALOG \"${PREFIX}/${DBKDIR}/$D/docbook.cat\"" \

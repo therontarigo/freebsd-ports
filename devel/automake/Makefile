@@ -15,10 +15,7 @@ LICENSE_COMB=	multi
 LICENSE_FILE_GPLv2+ =	${WRKSRC}/COPYING
 LICENSE_FILE_GFDL=	${WRKSRC}/doc/fdl.texi
 
-BUILD_DEPENDS=	autoconf>=2.69:devel/autoconf \
-		autoconf:devel/autoconf-wrapper
-# <theron> devel/autoconf-wrapper provides ${LOCALBASE}/bin/autoconf;
-# devel/autoconf does not.
+BUILD_DEPENDS=	autoconf>=2.69:devel/autoconf
 RUN_DEPENDS=	autoconf>=2.69:devel/autoconf
 
 BUILD_VERSION=	1.16

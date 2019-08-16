@@ -1103,6 +1103,7 @@ INTERCEPT_CC_MAP=${LOCALBASE}%${PORTBLDROOT}${LOCALBASE}
 # buildable before userns can be built.  Otherwise, use intercept lib.
 CHROOT_DO=${SETENV} ${INTERCEPT_ENV} PATH=${PATH_CHROOTED} env
 PORTENV=${CHROOT_DO}
+USE_PORTENV?=yes
 .endif
 
 # if using intercept lib, make sure bmake is installed
@@ -1733,6 +1734,7 @@ _POSTMKINCLUDED=	yes
 # directly (the target comes from a USES or from bsd.port.mk in which case it
 # is separated-build compliant).
 
+.if defined(USE_PORTENV)
 .if !defined(_portenv_target_checked) && !defined(_in_portenv)
 _portenv_target_checked=1
 # always use portenv for create-binary-alias
@@ -1745,6 +1747,7 @@ _portenv_target.${t}:=1
 .endfor
 .endfor
 .endif
+.endif # defined(USE_PORTENV)
 
 .if defined(BUNDLE_LIBS)
 PKG_NOTES+=	no_provide_shlib

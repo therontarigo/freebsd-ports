@@ -1146,11 +1146,15 @@ portbld-prepare-package: ${PACKAGES}
 portbld-prepare-install: ${PORTBLDROOT} ${PORTBLDROOT}/var/run/ld-elf.so.hints
 .endif
 
-# runchrt: run command specified by setting CMD inside file redirection
-# environment
-.if !target(runchrt)
-runchrt:
+# portenv-shell: run interactive shell or command given by CMD inside portenv
+.if !target(portenv-shell)
+portenv-shell:
+.if defined(CMD)
 	@${PORTENV} ${CMD}
+.else
+	@${PORTENV} PS1='portenv:${PKGORIGIN} \W \$$ ' /bin/sh
+	@${ECHO}
+.endif
 .endif
 
 # Run post-install scripts only when appropriate

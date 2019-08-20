@@ -137,7 +137,7 @@ BROKEN=		USES=gmake is incompatible with cmake's ninja-generator
 do-configure:
 	@${ECHO_MSG} ${_CMAKE_MSG}
 	${MKDIR} ${CONFIGURE_WRKSRC}
-	@cd ${CONFIGURE_WRKSRC}; ${CHROOT_DO} ${SETENV} ${CONFIGURE_ENV} ${CMAKE_BIN} ${CMAKE_ARGS} ${CMAKE_SOURCE_PATH}
+	@cd ${CONFIGURE_WRKSRC}; ${PORTENV} ${CONFIGURE_ENV} ${CMAKE_BIN} ${CMAKE_ARGS} ${CMAKE_SOURCE_PATH}
 .endif
 
 .endif #!defined(_INCLUDE_USES_CMAKE_MK)

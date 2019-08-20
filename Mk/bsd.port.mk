@@ -1101,8 +1101,7 @@ INTERCEPT_CC_MAP=${LOCALBASE}%${PORTBLDROOT}${LOCALBASE}
     ("${PORTNAME}" != "userns")
 # Check that the port being built is not one of these named, which must be
 # buildable before userns can be built.  Otherwise, use intercept lib.
-CHROOT_DO=${SETENV} ${INTERCEPT_ENV} PATH=${PATH_CHROOTED} env
-PORTENV=${CHROOT_DO}
+PORTENV=${SETENV} ${INTERCEPT_ENV} PATH=${PATH_CHROOTED} env
 USE_PORTENV?=yes
 .endif
 
@@ -1151,7 +1150,7 @@ portbld-prepare-install: ${PORTBLDROOT} ${PORTBLDROOT}/var/run/ld-elf.so.hints
 # environment
 .if !target(runchrt)
 runchrt:
-	@${CHROOT_DO} ${CMD}
+	@${PORTENV} ${CMD}
 .endif
 
 # Run post-install scripts only when appropriate
@@ -2790,8 +2789,8 @@ HAS_CONFIGURE=		yes
 SET_LATE_CONFIGURE_ARGS= \
      _CONFIGURE_HELP_F=$$(${SETENV} TMPDIR=${WRKDIR} mktemp); \
      _CONFIGURE_VERSION_F=$$(${SETENV} TMPDIR=${WRKDIR} mktemp); \
-     ${CHROOT_DO} ${SH} -c "${CONFIGURE_CMD} --help 2>&1 > $${_CONFIGURE_HELP_F}"; \
-     ${CHROOT_DO} ${SH} -c "${CONFIGURE_CMD} --version 2>&1 > $${_CONFIGURE_VERSION_F}"; \
+     ${PORTENV} ${SH} -c "${CONFIGURE_CMD} --help 2>&1 > $${_CONFIGURE_HELP_F}"; \
+     ${PORTENV} ${SH} -c "${CONFIGURE_CMD} --version 2>&1 > $${_CONFIGURE_VERSION_F}"; \
      _LATE_CONFIGURE_ARGS="" ; \
 	if [ -z "${CONFIGURE_ARGS:M--localstatedir=*:Q}" ] && \
 	   ${GREP} -- --localstatedir $${_CONFIGURE_HELP_F} > /dev/null; then \
@@ -3393,7 +3392,7 @@ do-configure:
 	    INSTALL_LIB="${INSTALL_LIB}" \
 	    INSTALL_PROGRAM="${INSTALL_PROGRAM}" \
 	    INSTALL_SCRIPT="${INSTALL_SCRIPT}" \
-	    ${CHROOT_DO} ${CONFIGURE_ENV} ${CONFIGURE_CMD} ${CONFIGURE_ARGS}; then \
+	    ${PORTENV} ${CONFIGURE_ENV} ${CONFIGURE_CMD} ${CONFIGURE_ARGS}; then \
 			 ${ECHO_MSG} "===>  Script \"${CONFIGURE_SCRIPT}\" failed unexpectedly."; \
 			 (${ECHO_CMD} ${CONFIGURE_FAIL_MESSAGE}) | ${FMT_80} ; \
 			 ${FALSE}; \
@@ -3406,7 +3405,7 @@ do-configure:
 DO_MAKE_BUILD?=	${SETENV} ${MAKE_ENV} ${MAKE_CMD} ${MAKE_FLAGS} ${MAKEFILE} ${_MAKE_JOBS} ${MAKE_ARGS:C,^${DESTDIRNAME}=.*,,g}
 .if !target(do-build)
 do-build:
-	@(cd ${BUILD_WRKSRC}; if ! ${CHROOT_DO} ${DO_MAKE_BUILD} ${ALL_TARGET}; then \
+	@(cd ${BUILD_WRKSRC}; if ! ${PORTENV} ${DO_MAKE_BUILD} ${ALL_TARGET}; then \
 		if [ -n "${BUILD_FAIL_MESSAGE}" ] ; then \
 			${ECHO_MSG} "===> Compilation failed unexpectedly."; \
 			(${ECHO_CMD} "${BUILD_FAIL_MESSAGE}") | ${FMT_80} ; \
@@ -3517,7 +3516,7 @@ check-install-conflicts:
 
 .if !target(do-install) && !defined(NO_INSTALL)
 do-install:
-	@(cd ${INSTALL_WRKSRC} && ${CHROOT_DO} ${SETENV} ${MAKE_ENV} ${FAKEROOT} ${MAKE_CMD} ${MAKE_FLAGS} ${MAKEFILE} ${MAKE_ARGS} ${INSTALL_TARGET})
+	@(cd ${INSTALL_WRKSRC} && ${PORTENV} ${MAKE_ENV} ${FAKEROOT} ${MAKE_CMD} ${MAKE_FLAGS} ${MAKEFILE} ${MAKE_ARGS} ${INSTALL_TARGET})
 .endif
 
 # Test

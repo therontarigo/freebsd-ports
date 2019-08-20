@@ -83,9 +83,9 @@ do-autoreconf:
 		if test -f configure.ac; then configure=configure.ac; \
 		else configure=configure.in; fi && \
 		if ${EGREP} -q '^(AC|IT)_PROG_INTLTOOL' $${configure}; \
-		then ${CHROOT_DO} ${LOCALBASE}/bin/intltoolize -f -c; fi)
+		then ${PORTENV} ${LOCALBASE}/bin/intltoolize -f -c; fi)
 .endif
-	@(cd ${AUTORECONF_WRKSRC} && ${CHROOT_DO} ${AUTORECONF} -f -i)
+	@(cd ${AUTORECONF_WRKSRC} && ${PORTENV} ${AUTORECONF} -f -i)
 .elif ! ${autoreconf_ARGS:Mbuild}
 IGNORE= Incorrect 'USES+=autoreconf:${autoreconf_ARGS}' expecting 'USES+=autoreconf[:build]'
 .endif

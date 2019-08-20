@@ -1114,7 +1114,8 @@ USERNS_ORIGIN?=devel/userns
 PORTENV_DEPENDS+=	${LOCALBASE}/bin/bmake:${BMAKE_ORIGIN}
 PORTENV_DEPENDS+=	${LOCALBASE}/libexec/userns/intercept.so:${USERNS_ORIGIN}
 PKG_REGISTER=	${PKG_IN_PORTENV} register
-PKG_DELETE=	${PKG_IN_PORTENV} delete -y
+PKG_DELETE=		${PKG_IN_PORTENV} delete -y
+PKG_CREATE=		${PORTENV} ${PKG_BIN_DYN} create
 .endif
 
 # Allow creation of the location in which dependencies will be placed.
@@ -1138,7 +1139,7 @@ ${PACKAGES}:
 	${MKDIR} ${.TARGET}
 .endif
 .if !target(portbld-prepare-package)
-portbld-prepare-package: ${PACKAGES}
+portbld-prepare-package: ${PACKAGES} ${PORTBLDROOT}/var/run/ld-elf.so.hints
 .endif
 
 # Require dependency install location to exist before attempting installation.
@@ -5454,14 +5455,14 @@ _TEST_SEQ=		100:test-message 150:test-depends 300:pre-test 500:do-test \
 				800:post-test \
 				${_OPTIONS_test} ${_USES_test}
 _INSTALL_DEP=	stage portbld-prepare-install
-_INSTALL_SEQ=	 50:portbld-prepare-install \
+_INSTALL_SEQ=	050:portbld-prepare-install \
 				100:install-message \
 				200:check-already-installed \
 				300:create-manifest
 _INSTALL_SUSEQ=	400:fake-pkg 500:security-check
 
 _PACKAGE_DEP=	stage
-_PACKAGE_SEQ=	50:portbld-prepare-package \
+_PACKAGE_SEQ=	050:portbld-prepare-package \
 				100:package-message 300:pre-package 450:pre-package-script \
 				500:do-package 850:post-package-script \
 				${_OPTIONS_package} ${_USES_package}

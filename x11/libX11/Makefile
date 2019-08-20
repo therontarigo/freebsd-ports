@@ -18,6 +18,7 @@ USE_PERL5=	build
 CPE_VENDOR=	x
 
 CONFIGURE_ARGS+=	--datadir=${PREFIX}/lib \
+			--with-keysymdefdir=${PORTBLDROOT}${PREFIX}/include/X11 \
 			--without-xmlto \
 			--disable-specs
 CONFIGURE_ENV+=	ac_cv_path_PS2PDF=""

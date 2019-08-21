@@ -1038,6 +1038,9 @@ PATH_CHROOTED=/sbin:/bin:/usr/sbin:/usr/bin:${LOCALBASE}/sbin:${LOCALBASE}/bin
 PORT_DBDIR?=${PORTBLDBASE}/portdb
 DISTDIR?=${PORTBLDBASE}/distfiles
 PACKAGES?=${PORTBLDBASE}/packages
+# Always use PACKAGES location when using PORTS_SEPARATED_BUILD
+_HAVE_PACKAGES=	yes
+PKGFILE?=		${PKGREPOSITORY}/${PKGNAME}${PKG_SUFX}
 
 # devel/userns is assumed to be installed in PORTBLDROOT but this may be
 # overridden to test a developmental version of userns.

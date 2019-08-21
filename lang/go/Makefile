@@ -63,6 +63,8 @@ GO386=387
 
 PLIST_SUB+=	opsys_ARCH=${OPSYS:tl}_${GOARCH}
 
+NO_PORTENV=yes
+
 post-patch:
 	@cd ${WRKSRC} && ${FIND} . -name '*.orig' -delete
 	@${REINPLACE_CMD} -e 's|^if ulimit -T|false \&\& &|' ${WRKSRC}/src/run.bash
@@ -70,7 +72,7 @@ post-patch:
 do-build:
 	cd ${WRKSRC}/src && \
 		GOROOT=${WRKSRC} GOROOT_FINAL=${PREFIX}/go \
-		GOROOT_BOOTSTRAP=${LOCALBASE}/go14 \
+		GOROOT_BOOTSTRAP=${PORTBLDROOT}${LOCALBASE}/go14 \
 		GOBIN= GOARCH=${GOARCH} GOOS=${OPSYS:tl} \
 		GO386=${GO386} GOARM=${GOARM} CGO_ENABLED=1 \
 		${SH} make.bash -v

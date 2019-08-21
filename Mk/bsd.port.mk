@@ -1738,7 +1738,7 @@ _POSTMKINCLUDED=	yes
 # directly (the target comes from a USES or from bsd.port.mk in which case it
 # is separated-build compliant).
 
-.if defined(USE_PORTENV)
+.if defined(USE_PORTENV) && !defined(NO_PORTENV)
 .if !defined(_portenv_target_checked) && !defined(_in_portenv)
 _portenv_target_checked=1
 # always use portenv for create-binary-alias

@@ -1011,6 +1011,10 @@ FreeBSD_MAINTAINER=	portmgr@FreeBSD.org
 # Most port authors should not need to understand anything after this point.
 #
 
+
+# Note: the ports-separated-build logic is placed here only because it made
+# sense at the beginning of this project.  This is not the best place for it,
+# and it is *NOT* intended to remain here.
 .ifdef PORTS_SEPARATED_BUILD
 # Always require a WRKDIRPREFIX (user may change it)
 PORTBLDBASE?=/tmp/ports
